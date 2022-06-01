@@ -73,8 +73,6 @@
 #include <stream_buffer.h>
 #include <task.h>
 #include <timers.h>
-#include <string.h>
-
 
 // From module: Generic board support
 #include <board.h>
@@ -116,6 +114,9 @@
 
 // From module: System Clock Control - SAM4E implementation
 #include <sysclk.h>
+
+// From module: TC - Timer Counter
+#include <tc.h>
 
 // From module: USB Device MSC (Single Interface Device)
 #include <udi_msc.h>

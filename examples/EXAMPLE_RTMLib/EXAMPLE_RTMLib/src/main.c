@@ -38,7 +38,8 @@
 #include "conf_usb.h"
 #include "conf_board.h"
 #include "ui.h"
-#include "rtmlib.h"
+
+#include "Includes.h"
 
 static volatile bool main_b_msc_enable = false;
 
@@ -54,6 +55,7 @@ static void Task2(void *pvParameters);
 
 //! Handle to the semaphore protecting memories transfer.
 static xSemaphoreHandle main_trans_semphr = NULL;
+
 
 /*! \brief Main function. Execution starts here.
  */
@@ -78,11 +80,12 @@ int main(void)
 	Assert( main_trans_semphr != NULL );
 	
 	// Start USB stack to authorize VBus monitoring
-	udc_start();
+	//udc_start();
 	
 	//Start RunTime Verification Lib
 	rtmlib_init();
 	
+		
 	// Create a task to process data transfer
 	xTaskCreate(Task1,
 			((const signed portCHAR *)"DATA TRANSFER"),
@@ -129,7 +132,7 @@ static void Task1(void *pvParameters)
 	UNUSED(pvParameters);
 	while (true)
 	{
-		timestamp_runtime(count_tmp,TASK_IDENTIFIER_1);
+		timestamp_runtime(TASK_IDENTIFIER_1);
 		count_tmp++;
 		if(count_tmp % 2)
 		{
@@ -148,7 +151,7 @@ static void Task2(void *pvParameters)
 	UNUSED(pvParameters);
 	while (true)
 	{
-		timestamp_runtime(count_tmp2,TASK_IDENTIFIER_2);
+		timestamp_runtime(TASK_IDENTIFIER_2);
 		count_tmp2++;
 	}
 }
