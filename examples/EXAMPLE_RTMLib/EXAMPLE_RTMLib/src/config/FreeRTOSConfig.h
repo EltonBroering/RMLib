@@ -58,7 +58,7 @@
 #define configUSE_TICK_HOOK                        0
 #define configCPU_CLOCK_HZ        ( CHIP_FREQ_CPU_MAX ) /* Hz clk gen */
 #define configPBA_CLOCK_HZ        ( CHIP_FREQ_CPU_MAX )
-#define configTICK_RATE_HZ        ( ( portTickType ) 1000 )
+#define configTICK_RATE_HZ        ( ( portTickType ) 10000 )
 #define configMAX_PRIORITIES      ( 4 )
 #define configMINIMAL_STACK_SIZE  ( ( unsigned portSHORT ) 128 )
 /* configTOTAL_HEAP_SIZE is not used when heap_3.c is used. */
