@@ -8,7 +8,7 @@
 #ifndef RTMLIB_H_
 #define RTMLIB_H_
 
-#include <asf.h>
+#include "Includes.h"
 
 
 #define SIZE_RUN_TIME_BUFFER_QUEUE		1000
@@ -27,6 +27,6 @@ typedef struct PACKED
 // Init RMLib
 void rtmlib_init();
 
-int8_t timestamp_runtime(uint32_t TimeStamp,uint32_t Identifier_of_Queue);
+int8_t timestamp_runtime(uint32_t Identifier_of_Queue);
 
 #endif /* RTMLIB_H_ */

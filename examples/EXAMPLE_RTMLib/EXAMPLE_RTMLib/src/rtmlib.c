@@ -136,11 +136,11 @@ uint16_t cb_size(CircularBuffer_t *cb)
  *     @retval COMMAND_NOK		Indicates that the item could not be do
  *     @retval COMMAND_ERROR	Event error
  */
-int8_t timestamp_runtime(uint32_t TimeStamp,uint32_t Identifier_of_Task)
+int8_t timestamp_runtime(uint32_t Identifier_of_Task)
 {
 	portENTER_CRITICAL();
 	TimeStampInsert.Identifier_of_Task = Identifier_of_Task;
-	TimeStampInsert.TimeStamp = TimeStamp;
+	TimeStampInsert.TimeStamp = ReadCounterHundredsMicroSeconds();
 	int8_t return_function = cb_push_back(&QueueTimeStamps,&TimeStampInsert);
 	portEXIT_CRITICAL();
 	return return_function;
