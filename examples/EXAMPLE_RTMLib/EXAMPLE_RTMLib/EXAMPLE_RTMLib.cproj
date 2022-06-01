@@ -38,7 +38,6 @@
     <option id="common.services.basic.sleepmgr" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.usb.class.device" value="Add" config="mass_storage" content-id="Atmel.ASF" />
     <option id="thirdparty.os.freertos.version" value="Add" config="10.0.0" content-id="Atmel.ASF" />
-    <option id="sam.drivers.tc.appnote" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.usb.class.msc.device.example.freertos" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.utils.cmsis.sam4e.source.template" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.utils.syscalls" value="Add" config="" content-id="Atmel.ASF" />
@@ -352,7 +351,6 @@
       <Value>../src/ASF/sam/boards</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/config</Value>
-      <Value>../src/ASF/sam/drivers/tc</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize most (-O3)</armgcc.compiler.optimization.level>
@@ -404,7 +402,6 @@
       <Value>../src/ASF/sam/boards</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/config</Value>
-      <Value>../src/ASF/sam/drivers/tc</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.preprocessingassembler.general.AssemblerFlags>-DACCESS_USB_ENABLED -DARM_MATH_CM4=true -DBOARD=SAM4E_XPLAINED_PRO -DFREERTOS_USED -DUDD_ENABLE -DVIRTUAL_MEMORY_ENABLE -D__FREERTOS__ -D__SAM4E16E__ -Dprintf=iprintf -Dscanf=iscanf</armgcc.preprocessingassembler.general.AssemblerFlags>
@@ -439,7 +436,6 @@
       <Value>../src/ASF/sam/boards</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/config</Value>
-      <Value>../src/ASF/sam/drivers/tc</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
 </ArmGcc>
@@ -499,7 +495,6 @@
       <Value>../src/ASF/sam/boards</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/config</Value>
-      <Value>../src/ASF/sam/drivers/tc</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.OtherFlags>-fdata-sections</armgcc.compiler.optimization.OtherFlags>
@@ -552,7 +547,6 @@
       <Value>../src/ASF/sam/boards</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/config</Value>
-      <Value>../src/ASF/sam/drivers/tc</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
@@ -588,7 +582,6 @@
       <Value>../src/ASF/sam/boards</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/config</Value>
-      <Value>../src/ASF/sam/drivers/tc</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
   <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
@@ -628,8 +621,6 @@
     <Folder Include="src\ASF\sam\drivers\matrix\" />
     <Folder Include="src\ASF\sam\drivers\pio\" />
     <Folder Include="src\ASF\sam\drivers\pmc\" />
-    <Folder Include="src\ASF\sam\drivers\tc\" />
-    <Folder Include="src\ASF\sam\drivers\tc\tc_capture_waveform_example\" />
     <Folder Include="src\ASF\sam\drivers\udp\" />
     <Folder Include="src\ASF\sam\utils\" />
     <Folder Include="src\ASF\sam\utils\cmsis\" />
@@ -667,16 +658,7 @@
     <Folder Include="src\config\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\ASF\sam\drivers\tc\tc.c">
-      <SubType>compile</SubType>
-    </Compile>
     <None Include="src\config\conf_board.h">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="src\ASF\sam\drivers\tc\tc.h">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="src\ASF\sam\drivers\tc\tc_capture_waveform_example\tc_capture_waveform_example.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\Timings.c">

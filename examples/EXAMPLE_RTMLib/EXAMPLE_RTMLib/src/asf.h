@@ -115,9 +115,6 @@
 // From module: System Clock Control - SAM4E implementation
 #include <sysclk.h>
 
-// From module: TC - Timer Counter
-#include <tc.h>
-
 // From module: USB Device MSC (Single Interface Device)
 #include <udi_msc.h>
 
