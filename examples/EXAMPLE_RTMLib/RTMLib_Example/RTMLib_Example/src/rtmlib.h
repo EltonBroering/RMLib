@@ -29,4 +29,6 @@ void rtmlib_init();
 
 int8_t timestamp_runtime(uint32_t Identifier_of_Queue);
 
+extern void rtmlib_export_data(void * buffer_rtmlib);
+
 #endif /* RTMLIB_H_ */

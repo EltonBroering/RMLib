@@ -11,10 +11,15 @@
 
 #include <asf.h>
 #include <string.h>
+
+#include "VANT/pv_typedefs.h"
+
+#include "VANT/c_control_lqrArthur.h"
+
 #include "rtmlib.h"
 
 #include "Timings.h"
-#include "rtmlib.h"
+
 
 
 #endif /* INCLUDES_H_ */

@@ -21,7 +21,6 @@ typedef struct CircularBuffer
 
 CircularBuffer_t	QueueTimeStamps;		//Circular queue with timestamps
 TimeStamp_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
-TimeStamp_t			QueueTimeStampsBufferDumped[SIZE_RUN_TIME_BUFFER_QUEUE];
 TimeStamp_t			TimeStampInsert;
 
 /**
@@ -132,11 +131,9 @@ uint16_t cb_size(CircularBuffer_t *cb)
  */
 void dump_buffer_timestamp()
 {
-	memcpy(&QueueTimeStampsBufferDumped,&QueueTimeStampsBuffer,(size_t)(SIZE_RUN_TIME_BUFFER_QUEUE*sizeof(TimeStamp_t)));
-	rtmlib_init();
+	rtmlib_export_data(&QueueTimeStampsBuffer);
 	
-	//Send package to export
-	//printf("%u", );
+	rtmlib_init();
 }
 
 /**

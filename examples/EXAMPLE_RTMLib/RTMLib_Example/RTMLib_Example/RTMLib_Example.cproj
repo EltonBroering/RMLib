@@ -20,10 +20,10 @@
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
     <ProgFlashFromRam>true</ProgFlashFromRam>
-    <RamSnippetAddress />
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
     <UncachedRange />
     <preserveEEPROM>true</preserveEEPROM>
-    <OverrideVtorValue />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
     <BootSegment>2</BootSegment>
     <ResetRule>0</ResetRule>
     <eraseonlaunchrule>0</eraseonlaunchrule>
@@ -456,9 +456,9 @@
       <Value>../src/ASF/common/services/usb/udc</Value>
       <Value>../src/ASF/common/utils/stdio/stdio_usb</Value>
       <Value>../src/ASF/sam/drivers/udp</Value>
+      <Value>../src/VANT</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
-  <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
   <armgcc.compiler.optimization.OtherFlags>-fdata-sections</armgcc.compiler.optimization.OtherFlags>
   <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
   <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
@@ -611,6 +611,7 @@
     <Folder Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\portable\GCC\ARM_CM3\" />
     <Folder Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\portable\MemMang\" />
     <Folder Include="src\config\" />
+    <Folder Include="src\VANT\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\ASF\common\services\sleepmgr\sam\sleepmgr.c">
@@ -644,6 +645,15 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\Timings.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\VANT\c_control_lqrArthur.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\VANT\c_control_lqrArthur.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\VANT\pv_typedefs.h">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\ASF\sam\drivers\udp\udp_device.h">

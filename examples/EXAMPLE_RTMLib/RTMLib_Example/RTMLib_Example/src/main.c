@@ -86,13 +86,21 @@
 #include "conf_board.h"
 #include "Includes.h"
 
-#define TASK_MONITOR_STACK_SIZE            (2048/sizeof(portSTACK_TYPE))
-#define TASK_MONITOR_STACK_PRIORITY        (tskIDLE_PRIORITY)
-#define TASK_LED_STACK_SIZE                (1024/sizeof(portSTACK_TYPE))
-#define TASK_LED_STACK_PRIORITY            (tskIDLE_PRIORITY)
+#define TASK_CONTROLLER_STACK_SIZE				(1024/sizeof(portSTACK_TYPE))
+#define TASK_CONTROLLER_STACK_PRIORITY			(tskIDLE_PRIORITY+1)
+#define TASK_LED_STACK_SIZE						(1024/sizeof(portSTACK_TYPE))
+#define TASK_LED_STACK_PRIORITY					(tskIDLE_PRIORITY+1)
+#define TASK_COMMUNICATION_STACK_SIZE			(1024/sizeof(portSTACK_TYPE))
+#define TASK_COMMUNICATION_STACK_PRIORITY		(tskIDLE_PRIORITY+1)
+#define TASK_DUMMY_STACK_SIZE					(1024/sizeof(portSTACK_TYPE))
+#define TASK_DUMMY_STACK_PRIORITY				(tskIDLE_PRIORITY+1)
 
-#define TASK_IDENTIFIER_1		1
-#define TASK_IDENTIFIER_2		2
+#define TASK_IDENTIFIER_CONTROLLER			1
+#define TASK_IDENTIFIER_BLINK_LED			2
+#define TASK_IDENTIFIER_COMMUNICATION		3
+#define TASK_IDENTIFIER_DUMMY_1				4
+#define TASK_IDENTIFIER_DUMMY_2				5
+
 
 extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,
 		signed char *pcTaskName);
@@ -100,6 +108,12 @@ extern void vApplicationIdleHook(void);
 extern void vApplicationTickHook(void);
 extern void vApplicationMallocFailedHook(void);
 extern void xPortSysTickHandler(void);
+
+TimeStamp_t		QueueTimeStampsBufferDumped[SIZE_RUN_TIME_BUFFER_QUEUE];
+uint32_t		task_communication_count_messages = 0;
+
+pv_type_actuation	controller_ouput;
+pv_msg_input		controller_input;
 
 /**
  * \brief Called if stack overflow during execution
@@ -111,7 +125,8 @@ extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,
 	/* If the parameters have been corrupted then inspect pxCurrentTCB to
 	 * identify which task has overflowed its stack.
 	 */
-	for (;;) {
+	for (;;)
+	{
 	}
 }
 
@@ -141,22 +156,53 @@ extern void vApplicationMallocFailedHook(void)
 	configASSERT( ( volatile void * ) NULL );
 }
 
-/**
- * \brief This task, when activated, send every ten seconds on debug UART
- * the whole report of free heap and total tasks status
- */
-static void task_monitor(void *pvParameters)
+void rtmlib_export_data(void * buffer_rtmlib)
 {
-	static portCHAR szList[256];
-	UNUSED(pvParameters);
+	memcpy(&QueueTimeStampsBufferDumped,buffer_rtmlib,(size_t)(SIZE_RUN_TIME_BUFFER_QUEUE*sizeof(TimeStamp_t)));
+	
+	task_communication_count_messages = SIZE_RUN_TIME_BUFFER_QUEUE;
+}
 
+/**
+ * \brief Task Controller
+ */
+static void task_controller(void *pvParameters)
+{
+	UNUSED(pvParameters);
+	
 	for (;;)
 	{
-		timestamp_runtime(TASK_IDENTIFIER_1);
-		/*printf("--- task ## %u", (unsigned int)uxTaskGetNumberOfTasks());
-		vTaskList((signed portCHAR *)szList);
-		printf(szList);*/
-		//vTaskDelay(1000);
+		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
+		controller_ouput = c_control_lqrArthur_controller(controller_input);
+		vTaskDelay(10);
+	}
+}
+
+/**
+ * \brief Task Dummy 1
+ */
+static void task_dummy1(void *pvParameters)
+{
+	UNUSED(pvParameters);
+	
+	for (;;)
+	{
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_1);
+		vTaskDelay(10);
+	}
+}
+
+/**
+ * \brief Task Dummy 2
+ */
+static void task_dummy2(void *pvParameters)
+{
+	UNUSED(pvParameters);
+	
+	for (;;)
+	{
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_2);
+		vTaskDelay(10);
 	}
 }
 
@@ -168,13 +214,32 @@ static void task_led(void *pvParameters)
 	UNUSED(pvParameters);
 	for (;;)
 	{
-		timestamp_runtime(TASK_IDENTIFIER_2);
+		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED);
 		#if SAM4CM
 		LED_Toggle(LED4);
 		#else
 		LED_Toggle(LED0);
 		#endif
-		//vTaskDelay(1000);
+		vTaskDelay(10);
+	}
+}
+
+/**
+ * \brief Task Communication
+ */
+static void task_communication(void *pvParameters)
+{
+	UNUSED(pvParameters);
+	
+	for (;;)
+	{
+		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION);
+		while(task_communication_count_messages)
+		{
+			printf("{\"TaskIdentifier\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped[(task_communication_count_messages-1)].Identifier_of_Task,QueueTimeStampsBufferDumped[(task_communication_count_messages-1)].TimeStamp);
+			task_communication_count_messages--;
+		}
+		vTaskDelay(10);
 	}
 }
 
@@ -206,16 +271,34 @@ int main(void)
 	printf("-- Compiled: %s %s --\n\r", __DATE__, __TIME__);
 
 
-	/* Create task to monitor processor activity */
-	if (xTaskCreate(task_monitor, "Monitor", TASK_MONITOR_STACK_SIZE, NULL,
-			TASK_MONITOR_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create Monitor task\r\n");
+	/* Create task to controller */
+	if (xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL,
+			TASK_CONTROLLER_STACK_PRIORITY, NULL) != pdPASS) {
+		printf("Failed to create Controller task\r\n");
+	}
+	
+	/* Create task communication */
+	if (xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL,
+	TASK_COMMUNICATION_STACK_PRIORITY, NULL) != pdPASS) {
+		printf("Failed to create coomunication task\r\n");
 	}
 
 	/* Create task to make led blink */
 	if (xTaskCreate(task_led, "Led", TASK_LED_STACK_SIZE, NULL,
 			TASK_LED_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create test led task\r\n");
+		printf("Failed to create led task\r\n");
+	}
+	
+	/* Create task to make Dummy 1 */
+	if (xTaskCreate(task_dummy1, "Dummy 1", TASK_DUMMY_STACK_SIZE, NULL,
+	TASK_DUMMY_STACK_PRIORITY, NULL) != pdPASS) {
+		printf("Failed to create dummy task\r\n");
+	}
+	
+	/* Create task to make Dummy 2 */
+	if (xTaskCreate(task_dummy2, "Dummy 2", TASK_DUMMY_STACK_SIZE, NULL,
+	TASK_DUMMY_STACK_PRIORITY, NULL) != pdPASS) {
+		printf("Failed to create dummy task\r\n");
 	}
 
 	/* Start the scheduler. */

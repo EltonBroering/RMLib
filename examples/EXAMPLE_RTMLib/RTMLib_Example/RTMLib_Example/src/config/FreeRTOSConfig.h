@@ -69,12 +69,12 @@
 #   include "sysclk.h"
 #endif
 
-//#define configUSE_PREEMPTION                     1
-#define configUSE_PREEMPTION                       0
+#define configUSE_PREEMPTION                     1
+//#define configUSE_PREEMPTION                       0
 #define configUSE_IDLE_HOOK                        1
 #define configUSE_TICK_HOOK                        1
 #define configCPU_CLOCK_HZ                         (sysclk_get_cpu_hz())
-#define configTICK_RATE_HZ                         ((portTickType) 10000)
+#define configTICK_RATE_HZ                         ((portTickType) 1000)
 #define configMINIMAL_STACK_SIZE                   ((unsigned short) 70)
 #define configTOTAL_HEAP_SIZE                    ((size_t) ( 0x2C00-600 ))
 #define configMAX_TASK_NAME_LEN                    ( 16 )
