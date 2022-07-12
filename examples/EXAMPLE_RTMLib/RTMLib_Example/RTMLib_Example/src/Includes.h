@@ -12,14 +12,14 @@
 #include <asf.h>
 #include <string.h>
 
-#include "VANT/pv_typedefs.h"
-
-#include "VANT/c_control_lqrArthur.h"
+#include "arm_math.h"
 
 #include "rtmlib.h"
 
 #include "Timings.h"
 
+#include "VANT/pv_typedefs.h"
 
+#include "VANT/c_control_lqrArthur.h"
 
 #endif /* INCLUDES_H_ */

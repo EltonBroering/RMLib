@@ -69,28 +69,29 @@
 #   include "sysclk.h"
 #endif
 
-#define configUSE_PREEMPTION                     1
+#define configUSE_PREEMPTION						1
 //#define configUSE_PREEMPTION                       0
-#define configUSE_IDLE_HOOK                        1
-#define configUSE_TICK_HOOK                        1
-#define configCPU_CLOCK_HZ                         (sysclk_get_cpu_hz())
-#define configTICK_RATE_HZ                         ((portTickType) 1000)
-#define configMINIMAL_STACK_SIZE                   ((unsigned short) 70)
-#define configTOTAL_HEAP_SIZE                    ((size_t) ( 0x2C00-600 ))
-#define configMAX_TASK_NAME_LEN                    ( 16 )
-#define configUSE_TRACE_FACILITY                   1
-#define configUSE_16_BIT_TICKS                     0
-#define configIDLE_SHOULD_YIELD                    0
-#define configUSE_CO_ROUTINES                      0
-#define configUSE_MUTEXES                          1
-#define configUSE_RECURSIVE_MUTEXES                0
-#define configCHECK_FOR_STACK_OVERFLOW             2
-#define configGENERATE_RUN_TIME_STATS              0
-#define configENABLE_BACKWARD_COMPATIBILITY        1
+#define configUSE_IDLE_HOOK							1
+#define configUSE_TICK_HOOK							1
+#define configCPU_CLOCK_HZ							(sysclk_get_cpu_hz())
+#define configTICK_RATE_HZ							((portTickType) 1000)
+#define configMINIMAL_STACK_SIZE					((unsigned short) 256)
+//#define configTOTAL_HEAP_SIZE						((size_t) ( 0x2C00-600 ))
+#define configTOTAL_HEAP_SIZE						((size_t) (16384))			// [original]
+#define configMAX_TASK_NAME_LEN						( 16 )
+#define configUSE_TRACE_FACILITY					1
+#define configUSE_16_BIT_TICKS						0
+#define configIDLE_SHOULD_YIELD						0
+#define configUSE_CO_ROUTINES						0
+#define configUSE_MUTEXES							1
+#define configUSE_RECURSIVE_MUTEXES					0
+#define configCHECK_FOR_STACK_OVERFLOW				2
+#define configGENERATE_RUN_TIME_STATS				0
+#define configENABLE_BACKWARD_COMPATIBILITY			1
 
-#define configMAX_PRIORITIES                       (5)
-#define configMAX_CO_ROUTINE_PRIORITIES            (2)
-#define configQUEUE_REGISTRY_SIZE                  10
+#define configMAX_PRIORITIES						(5)
+#define configMAX_CO_ROUTINE_PRIORITIES				(2)
+#define configQUEUE_REGISTRY_SIZE					10
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
@@ -106,10 +107,10 @@ to exclude the API function. */
 
 #define configKERNEL_INTERRUPT_PRIORITY            (0x0f << 4) /* Priority 15, or 255 as only the top four bits are implemented.  This is the lowest priority. */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY       (0x05 << 4) /* Priority 5, or 80 as only the top four bits are implemented. */
-#define configUSE_STATS_FORMATTING_FUNCTIONS 1
+#define configUSE_STATS_FORMATTING_FUNCTIONS		1
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
 standard names. */
-#define xPortPendSVHandler PendSV_Handler
-#define vPortSVCHandler SVC_Handler
-#define xPortSysTickHandler SysTick_Handler
+#define xPortPendSVHandler						PendSV_Handler
+#define vPortSVCHandler							SVC_Handler
+#define xPortSysTickHandler						SysTick_Handler
 #endif /* FREERTOS_CONFIG_H */

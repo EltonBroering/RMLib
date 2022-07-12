@@ -10,6 +10,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "c_control_lqrArthur.h"
 
+
 //---------------------------------------------------------------------------------------------
 
 /* Exported functions definitions --------------------------------------------*/
@@ -21,7 +22,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-static pv_type_stability_error last_error={0};
+static pv_type_stability_error last_error;
 
 /* DlqrArthur */
 static float32_t K_f32[4][20] = {{-0.000509474023994 ,  1.381002006541810 ,  2.044930990723325 , -4.098388643419657 ,  0.002544968427177 ,  0.065243786421189, -0.011997162152724 ,  0.012231188237446 , -0.000191109567030 ,  0.977046060078436  , 2.067519443836474 , -1.069820095142832,
@@ -45,51 +46,68 @@ static float32_t K_f32[4][20] = {{-0.000509474023994 ,  1.381002006541810 ,  2.0
 };
 
 static float32_t equilibrium_point_f32[20]={2.0,0.0,1.5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-static float32_t equilibrium_control_f32[4]={10.2751,	10.2799, 0, 0};
-static float32_t state_vector_f32[20]={0};
-static float32_t error_state_vector_f32[20]={0};
-static float32_t control_output_f32[20]={0};
-static float32_t delta_control_f32[20]={0};
+static float32_t equilibrium_control_f32[4]={10.2751,10.2799, 0, 0};
+static float32_t state_vector_f32[20];
+static float32_t error_state_vector_f32[20];
+static float32_t control_output_f32[20];
+static float32_t delta_control_f32[20];
 
 static arm_matrix_instance_f32 equilibrium_control;
 static arm_matrix_instance_f32 K;
 
+arm_matrix_instance_f32 error_state_vector, delta_control, control_output;
+
+pv_type_datapr_attitude attitude, attitude_reference;
+pv_type_datapr_position position, position_reference;
+pv_type_datapr_servos servos;
+
+
+double x_atual, y_atual, z_atual, yaw_atual;
+
+float32_t xint, x_ant, yint, y_ant, zint, z_ant, yawint, yaw_ant, T;
 
 /* Private function prototypes -----------------------------------------------*/
 /* static arm_matrix_instance_f32 c_control_lqrArthur_calcErrorStateVector(pv_type_datapr_attitude attitude, pv_type_datapr_attitude attitude_reference, pv_type_datapr_position position, pv_type_datapr_position position_reference); */
-arm_matrix_instance_f32 c_control_lqrArthur_calcErrorStateVector(pv_msg_input inputData);
 
 /* Private functions ---------------------------------------------------------*/
-arm_matrix_instance_f32 c_control_lqrArthur_calcErrorStateVector(pv_msg_input inputData) {
-	pv_type_datapr_attitude attitude = inputData.attitude;
-	pv_type_datapr_attitude attitude_reference = inputData.attitude_reference;
-	pv_type_datapr_position position = inputData.position;
-	pv_type_datapr_position position_reference = inputData.position_reference;
-	pv_type_datapr_servos servos = inputData.servosOutput.servo;
-	arm_matrix_instance_f32 error_state_vector, state_vector, equilibrium_point;
-
-
-	static float32_t xint = 0, x_ant = 0;
-	static float32_t yint = 0, y_ant = 0;
-	static float32_t zint = 0, z_ant = 0;
-	static float32_t yawint = 0, yaw_ant = 0;
+void c_control_lqrArthur_calcErrorStateVector(pv_msg_input * inputData,arm_matrix_instance_f32 * output_data)
+{
 	
-	float32_t T = 0.012;
+	arm_matrix_instance_f32 state_vector, equilibrium_point;
+	
+	attitude = inputData->attitude;
+	attitude_reference = inputData->attitude_reference;
+	position = inputData->position;
+	position_reference = inputData->position_reference;
+	servos = inputData->servosOutput.servo;
+	
+
+	xint = 0; x_ant = 0;
+	yint = 0; y_ant = 0;
+	zint = 0; z_ant = 0;
+	yawint = 0; yaw_ant = 0;
+	
+	T = 0.012;
 
 	// Integrador Trapezoidal
-	double x_atual = position.x - position_reference.x;
-	xint = xint + (T/2)*(x_atual + x_ant);
+	x_atual = (double)position.x - position_reference.x;
+	
+	xint = (double)xint + (T/2.0)*(x_atual + x_ant);
 	x_ant = x_atual;
-	double y_atual = position.y - position_reference.y;
-	yint = yint + (T/2)*(y_atual + y_ant);
+	
+	y_atual = (double)position.y - position_reference.y;
+	yint = (double)yint + (T/2.0)*(y_atual + y_ant);
 	y_ant = y_atual;
-	double z_atual = position.z - position_reference.z;
-	zint = zint + (T/2)*(z_atual + z_ant);
+	
+	
+	z_atual = (double)position.z - position_reference.z;
+	zint = (double)zint + (T/2.0)*(z_atual + z_ant);
 	z_ant = z_atual;
-	double yaw_atual = attitude.yaw;
-	yawint = yawint + (T/2)*(yaw_atual + yaw_ant);
+	
+	yaw_atual = (double)attitude.yaw;
+	yawint = (double)yawint + (T/2.0)*(yaw_atual + yaw_ant);
 	yaw_ant = yaw_atual;
-
+	
 	//State Vector
 	state_vector_f32[0]=position.x;
 	state_vector_f32[1]=position.y;
@@ -121,17 +139,16 @@ arm_matrix_instance_f32 c_control_lqrArthur_calcErrorStateVector(pv_msg_input in
 	equilibrium_point_f32[1]= position_reference.y;
 	equilibrium_point_f32[2]= position_reference.z;
 	/* equilibrium_point_f32[5]= attitude_reference.yaw; */
-
-
+	
 	//Initializes the matrices
 	arm_mat_init_f32(&equilibrium_point, 20, 1, (float32_t *)equilibrium_point_f32);
 	arm_mat_init_f32(&state_vector, 20, 1, (float32_t *)state_vector_f32);
-	arm_mat_init_f32(&error_state_vector, 20, 1, (float32_t *)error_state_vector_f32);
-
+	arm_mat_init_f32(output_data, 20, 1, (float32_t *)error_state_vector_f32);
+	
 	//e(t)=x(t)- equilibrium_point
-	arm_mat_sub_f32(&state_vector, &equilibrium_point, &error_state_vector);
+	arm_mat_sub_f32(&state_vector, &equilibrium_point, output_data);
 
-	return error_state_vector;
+	return;
 }
 
 
@@ -158,35 +175,31 @@ void c_control_lqrArthur_init()
 
 
 /** \brief lqrArthur Controller.  */
-pv_type_actuation c_control_lqrArthur_controller(pv_msg_input inputData)
+void c_control_lqrArthur_controller(pv_msg_input * inputData, pv_type_actuation * output_data)
 {
-	pv_type_actuation actuation_signals;
-	
-	arm_matrix_instance_f32 error_state_vector, delta_control, control_output;
-	
 	//Initialize result matrices
 	arm_mat_init_f32(&control_output, 4, 1, (float32_t *)control_output_f32);
 	arm_mat_init_f32(&delta_control,4,1,(float32_t *)delta_control_f32);
 	
 	pv_type_stability_error error;
-	float temp_height_takeoff=0;
+	float temp_height_takeoff;
 
-	error_state_vector = c_control_lqrArthur_calcErrorStateVector(inputData);
-
+	c_control_lqrArthur_calcErrorStateVector(inputData,&error_state_vector);
+	
 	/* -delta_u = K*delta_x */
 	arm_mat_mult_f32(&K, &error_state_vector, &delta_control);
 	/* u = ur - delta_u */
 	arm_mat_sub_f32(&equilibrium_control, &delta_control, &control_output);
-	//
+	
 	//The result must be in a struct pv_msg_io_actuation
-	actuation_signals.escRightNewtons= (float)control_output.pData[0];
-	actuation_signals.escLeftNewtons=	 (float)control_output.pData[1];
-	actuation_signals.servoRight=	 (float)control_output.pData[2];
-	actuation_signals.servoLeft=	 (float)control_output.pData[3];
+	output_data->escRightNewtons= (float)control_output.pData[0];
+	output_data->escLeftNewtons=	 (float)control_output.pData[1];
+	output_data->servoRight=	 (float)control_output.pData[2];
+	output_data->servoLeft=	 (float)control_output.pData[3];
     //Declares that the servos will use angle control, rather than torque control
-	actuation_signals.servoTorqueControlEnable = 0;
+	output_data->servoTorqueControlEnable = 0;
 
-	return actuation_signals;
+	return;
 }
 
 // colocar prototipos das funçoes

@@ -12,8 +12,8 @@
 #define C_CONTROL_LQRARTHUR_H
 
 #define ARM_MATH_CM4
+
 #include "Includes.h"
-#include "arm_math.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -30,7 +30,7 @@
 void c_control_lqrArthur_init();
 
 //LQR attitude and height(AH) controller. Height control depends on global variable manual_height_control.
-pv_type_actuation c_control_lqrArthur_controller(pv_msg_input inputData);
+void c_control_lqrArthur_controller(pv_msg_input * inputData, pv_type_actuation * output_data);
 
 #ifdef __cplusplus
 }

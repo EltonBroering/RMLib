@@ -86,13 +86,13 @@
 #include "conf_board.h"
 #include "Includes.h"
 
-#define TASK_CONTROLLER_STACK_SIZE				(1024/sizeof(portSTACK_TYPE))
+#define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
 #define TASK_CONTROLLER_STACK_PRIORITY			(tskIDLE_PRIORITY+1)
-#define TASK_LED_STACK_SIZE						(1024/sizeof(portSTACK_TYPE))
+#define TASK_LED_STACK_SIZE						(configMINIMAL_STACK_SIZE)
 #define TASK_LED_STACK_PRIORITY					(tskIDLE_PRIORITY+1)
-#define TASK_COMMUNICATION_STACK_SIZE			(1024/sizeof(portSTACK_TYPE))
+#define TASK_COMMUNICATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
 #define TASK_COMMUNICATION_STACK_PRIORITY		(tskIDLE_PRIORITY+1)
-#define TASK_DUMMY_STACK_SIZE					(1024/sizeof(portSTACK_TYPE))
+#define TASK_DUMMY_STACK_SIZE					(configMINIMAL_STACK_SIZE)
 #define TASK_DUMMY_STACK_PRIORITY				(tskIDLE_PRIORITY+1)
 
 #define TASK_IDENTIFIER_CONTROLLER			1
@@ -170,10 +170,12 @@ static void task_controller(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
+	c_control_lqrArthur_init();
+	
 	for (;;)
 	{
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
-		controller_ouput = c_control_lqrArthur_controller(controller_input);
+		c_control_lqrArthur_controller(&controller_input,&controller_ouput);
 		vTaskDelay(10);
 	}
 }
