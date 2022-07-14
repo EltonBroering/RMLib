@@ -1,9 +1,9 @@
 /**
  * \file
  *
- * \brief SAM4E-EK board init.
+ * \brief SAM4E-XPRO board init.
  *
- * Copyright (c) 2012-2018 Microchip Technology Inc. and its subsidiaries.
+ * Copyright (c) 2014-2018 Microchip Technology Inc. and its subsidiaries.
  *
  * \asf_license_start
  *
@@ -93,20 +93,11 @@ void board_init(void)
 	 */
 	ioport_set_pin_dir(LED0_GPIO, IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(LED0_GPIO, LED0_INACTIVE_LEVEL);
-	ioport_set_pin_dir(LED1_GPIO, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(LED1_GPIO, LED0_INACTIVE_LEVEL);
-	ioport_set_pin_dir(LED2_GPIO, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(LED2_GPIO, LED0_INACTIVE_LEVEL);
+
 
 	/* Configure Push Button pins */
 	ioport_set_pin_input_mode(GPIO_PUSH_BUTTON_1, GPIO_PUSH_BUTTON_1_FLAGS,
 			GPIO_PUSH_BUTTON_1_SENSE);
-	ioport_set_pin_input_mode(GPIO_PUSH_BUTTON_2, GPIO_PUSH_BUTTON_2_FLAGS,
-			GPIO_PUSH_BUTTON_2_SENSE);
-	ioport_set_pin_input_mode(GPIO_PUSH_BUTTON_3, GPIO_PUSH_BUTTON_3_FLAGS,
-			GPIO_PUSH_BUTTON_3_SENSE);
-	ioport_set_pin_input_mode(GPIO_PUSH_BUTTON_4, GPIO_PUSH_BUTTON_4_FLAGS,
-			GPIO_PUSH_BUTTON_4_SENSE);
 
 #ifdef CONF_BOARD_UART_CONSOLE
 	/* Configure UART pins */
@@ -119,83 +110,7 @@ void board_init(void)
 	ioport_set_pin_peripheral_mode(PIN_PWM_LED0_GPIO, PIN_PWM_LED0_FLAGS);
 #endif
 
-#ifdef CONF_BOARD_PWM_LED1
-	/* Configure PWM LED1 pin */
-	ioport_set_pin_peripheral_mode(PIN_PWM_LED1_GPIO, PIN_PWM_LED1_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_PWM_LED2
-	/* Configure PWM LED2 pin */
-	ioport_set_pin_peripheral_mode(PIN_PWM_LED2_GPIO, PIN_PWM_LED2_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_PWM_LED3
-	/* Configure PWM LED3 pin */
-	ioport_set_pin_peripheral_mode(PIN_PWM_LED3_GPIO, PIN_PWM_LED3_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_USART_RXD
-	/* Configure USART RXD pin */
-	ioport_set_pin_peripheral_mode(PIN_USART1_RXD_IDX,
-			PIN_USART1_RXD_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_USART_TXD
-	/* Configure USART TXD pin */
-	ioport_set_pin_peripheral_mode(PIN_USART1_TXD_IDX,
-			PIN_USART1_TXD_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_USART_CTS
-	/* Configure USART CTS pin */
-	ioport_set_pin_peripheral_mode(PIN_USART1_CTS_IDX,
-			PIN_USART1_CTS_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_USART_RTS
-	/* Configure USART RTS pin */
-	ioport_set_pin_peripheral_mode(PIN_USART1_RTS_IDX,
-			PIN_USART1_RTS_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_USART_SCK
-	/* Configure USART synchronous communication SCK pin */
-	ioport_set_pin_peripheral_mode(PIN_USART1_SCK_IDX,
-			PIN_USART1_SCK_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_ADM3312_EN
-	/* Configure ADM3312 enable pin */
-	ioport_set_pin_dir(PIN_USART1_EN_IDX, IOPORT_DIR_OUTPUT);
-#ifdef CONF_BOARD_ADM3312_EN_DISABLE_AT_INIT
-	ioport_set_pin_level(PIN_USART1_EN_IDX, PIN_USART1_EN_INACTIVE_LEVEL);
-#else
-	ioport_set_pin_level(PIN_USART1_EN_IDX, PIN_USART1_EN_ACTIVE_LEVEL);
-#endif
-#endif
-
-#ifdef CONF_BOARD_ADS7843
-	/* Configure Touchscreen SPI pins */
-	ioport_set_pin_dir(BOARD_ADS7843_IRQ_GPIO, IOPORT_DIR_INPUT);
-	ioport_set_pin_mode(BOARD_ADS7843_IRQ_GPIO, BOARD_ADS7843_IRQ_FLAGS);
-	ioport_set_pin_dir(BOARD_ADS7843_BUSY_GPIO, IOPORT_DIR_INPUT);
-	ioport_set_pin_mode(BOARD_ADS7843_BUSY_GPIO, BOARD_ADS7843_BUSY_FLAGS);
-	ioport_set_pin_peripheral_mode(SPI_MISO_GPIO, SPI_MISO_FLAGS);
-	ioport_set_pin_peripheral_mode(SPI_MOSI_GPIO, SPI_MOSI_FLAGS);
-	ioport_set_pin_peripheral_mode(SPI_SPCK_GPIO, SPI_SPCK_FLAGS);
-	ioport_set_pin_peripheral_mode(SPI_NPCS0_GPIO, SPI_NPCS0_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_CAN0
-	/* Configure the CAN0 TX and RX pins. */
-	ioport_set_pin_peripheral_mode(PIN_CAN0_RX_IDX, PIN_CAN0_RX_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_CAN0_TX_IDX, PIN_CAN0_TX_FLAGS);
-	/* Configure the transiver0 RS & EN pins. */
-	ioport_set_pin_dir(PIN_CAN0_TR_RS_IDX, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_dir(PIN_CAN0_TR_EN_IDX, IOPORT_DIR_OUTPUT);
-#endif
-
-#ifdef CONF_BOARD_CAN1
+#ifdef CONF_BOARD_CAN
 	/* Configure the CAN1 TX and RX pin. */
 	ioport_set_pin_peripheral_mode(PIN_CAN1_RX_IDX, PIN_CAN1_RX_FLAGS);
 	ioport_set_pin_peripheral_mode(PIN_CAN1_TX_IDX, PIN_CAN1_TX_FLAGS);
@@ -206,54 +121,8 @@ void board_init(void)
 
 #if defined(CONF_BOARD_USB_PORT)
 #  if defined(CONF_BOARD_USB_VBUS_DETECT)
-	gpio_configure_pin(USB_VBUS_PIN, USB_VBUS_FLAGS);
+	ioport_set_pin_peripheral_mode(USB_VBUS_PIN, USB_VBUS_FLAGS);
 #  endif
-#endif
-
-#if defined(CONF_BOARD_ILI9325) || defined(CONF_BOARD_ILI93XX)
-	/* Configure LCD EBI pins */
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D0,PIN_EBI_DATA_BUS_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D1,PIN_EBI_DATA_BUS_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D2,PIN_EBI_DATA_BUS_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D3,PIN_EBI_DATA_BUS_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D4,PIN_EBI_DATA_BUS_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D5,PIN_EBI_DATA_BUS_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D6,PIN_EBI_DATA_BUS_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D7,PIN_EBI_DATA_BUS_FLAGS);
-
-	ioport_set_pin_peripheral_mode(PIN_EBI_NRD,PIN_EBI_NRD_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_NWE,PIN_EBI_NWE_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_NCS1,PIN_EBI_NCS1_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_EBI_LCD_RS,PIN_EBI_LCD_RS_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_AAT3155
-	/* Configure Backlight control pin */
-	ioport_set_pin_dir(BOARD_AAT31XX_SET_GPIO, IOPORT_DIR_OUTPUT);
-#endif
-
-#ifdef CONF_BOARD_SPI
-	ioport_set_pin_peripheral_mode(SPI_MISO_GPIO, SPI_MISO_FLAGS);
-	ioport_set_pin_peripheral_mode(SPI_MOSI_GPIO, SPI_MOSI_FLAGS);
-	ioport_set_pin_peripheral_mode(SPI_SPCK_GPIO, SPI_SPCK_FLAGS);
-
-#ifdef CONF_BOARD_SPI_NPCS0
-	ioport_set_pin_peripheral_mode(SPI_NPCS0_GPIO, SPI_NPCS0_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_SPI_NPCS3
-#if defined(CONF_BOARD_SPI_NPCS3_GPIO) && defined(CONF_BOARD_SPI_NPCS3_FLAGS)
-	ioport_set_pin_peripheral_mode(CONF_BOARD_SPI_NPCS3_GPIO,
-			CONF_BOARD_SPI_NPCS3_FLAGS);
-#else
-	ioport_set_pin_peripheral_mode(SPI_NPCS3_PA5_GPIO, SPI_NPCS3_PA5_FLAGS);
-#endif
-#endif
-#endif
-
-#if (defined(CONF_BOARD_TWI0) || defined(CONF_BOARD_QTOUCH))
-	ioport_set_pin_peripheral_mode(TWI0_DATA_GPIO, TWI0_DATA_FLAGS);
-	ioport_set_pin_peripheral_mode(TWI0_CLK_GPIO, TWI0_CLK_FLAGS);
 #endif
 
 #if defined (CONF_BOARD_SD_MMC_HSMCI)
@@ -264,15 +133,6 @@ void board_init(void)
 	ioport_set_pin_peripheral_mode(PIN_HSMCI_MCDA1_GPIO, PIN_HSMCI_MCDA1_FLAGS);
 	ioport_set_pin_peripheral_mode(PIN_HSMCI_MCDA2_GPIO, PIN_HSMCI_MCDA2_FLAGS);
 	ioport_set_pin_peripheral_mode(PIN_HSMCI_MCDA3_GPIO, PIN_HSMCI_MCDA3_FLAGS);
-
-	/* Configure SD/MMC card detect pin */
-	ioport_set_pin_dir(SD_MMC_0_CD_GPIO, IOPORT_DIR_INPUT);
-	ioport_set_pin_mode(SD_MMC_0_CD_GPIO, SD_MMC_0_CD_FLAGS);
-#endif
-
-#ifdef CONF_BOARD_TWI1
-	ioport_set_pin_peripheral_mode(TWI1_DATA_GPIO, TWI1_DATA_FLAGS);
-	ioport_set_pin_peripheral_mode(TWI1_CLK_GPIO, TWI1_CLK_FLAGS);
 #endif
 
 #ifdef CONF_BOARD_KSZ8051MNL
@@ -313,30 +173,6 @@ void board_init(void)
 	ioport_set_pin_dir(PIN_KSZ8051MNL_INTRP_IDX, IOPORT_DIR_INPUT);
 #endif
 
-#ifdef CONF_BOARD_TFDU4300_SD
-	/* Configure IrDA transceiver shutdown pin */
-	ioport_set_pin_dir(PIN_IRDA_SD_IDX, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(PIN_IRDA_SD_IDX, IOPORT_PIN_LEVEL_HIGH);
-#endif
-
-#ifdef CONF_BOARD_ADM3485_RE
-	/* Configure RS485 transceiver RE pin */
-	ioport_set_pin_dir(PIN_RE_IDX, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(PIN_RE_IDX, IOPORT_PIN_LEVEL_LOW);
-#endif
-
-#ifdef CONF_BOARD_ISO7816_RST
-	/* Configure ISO7816 card reset pin */
-	ioport_set_pin_dir(PIN_ISO7816_RST_IDX, IOPORT_DIR_OUTPUT);
-	ioport_set_pin_level(PIN_ISO7816_RST_IDX, IOPORT_PIN_LEVEL_LOW);
-#endif
-
-#ifdef CONF_BOARD_ISO7816
-	/* Configure ISO7816 interface TXD & SCK pin */
-	ioport_set_pin_peripheral_mode(PIN_USART1_TXD_IDX, PIN_USART1_TXD_FLAGS);
-	ioport_set_pin_peripheral_mode(PIN_USART1_SCK_IDX, PIN_USART1_SCK_FLAGS);
-#endif
-
 #ifdef CONF_BOARD_NAND
 	ioport_set_pin_peripheral_mode(PIN_EBI_NANDOE,   PIN_EBI_NANDOE_FLAGS);
 	ioport_set_pin_peripheral_mode(PIN_EBI_NANDWE,   PIN_EBI_NANDWE_FLAGS);
@@ -350,15 +186,72 @@ void board_init(void)
 	ioport_set_pin_peripheral_mode(PIN_EBI_NANDIO_5, PIN_EBI_NANDIO_5_FLAGS);
 	ioport_set_pin_peripheral_mode(PIN_EBI_NANDIO_6, PIN_EBI_NANDIO_6_FLAGS);
 	ioport_set_pin_peripheral_mode(PIN_EBI_NANDIO_7, PIN_EBI_NANDIO_7_FLAGS);
-    ioport_set_pin_dir(PIN_NF_CE_IDX, IOPORT_DIR_OUTPUT);
-    ioport_set_pin_dir(PIN_NF_RB_IDX, IOPORT_DIR_INPUT);
+	ioport_set_pin_dir(PIN_NF_CE_IDX, IOPORT_DIR_OUTPUT);
+	ioport_set_pin_dir(PIN_NF_RB_IDX, IOPORT_DIR_INPUT);
 	ioport_set_pin_mode(PIN_NF_RB_IDX, IOPORT_MODE_PULLUP);
 #endif
 
+#ifdef CONF_BOARD_SRAM
+	ioport_set_pin_peripheral_mode(PIN_EBI_NCS1, PIN_EBI_NCS1_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_NCS3, PIN_EBI_NCS3_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_NRD, PIN_EBI_NRD_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_NWE, PIN_EBI_NWE_FLAGS);
 
-#ifdef CONF_BOARD_QTOUCH
-	/* Configure CHANGE pin for QTouch device */
-	ioport_set_pin_input_mode(BOARD_QT_CHANGE_PIN_IDX, BOARD_QT_CHANGE_PIN_FLAGS,
-			BOARD_QT_CHANGE_PIN_SENSE);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D0, PIN_EBI_DATA_BUS_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D1, PIN_EBI_DATA_BUS_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D2, PIN_EBI_DATA_BUS_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D3, PIN_EBI_DATA_BUS_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D4, PIN_EBI_DATA_BUS_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D5, PIN_EBI_DATA_BUS_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D6, PIN_EBI_DATA_BUS_FLAGS);
+	ioport_set_pin_peripheral_mode(PIN_EBI_DATA_BUS_D7, PIN_EBI_DATA_BUS_FLAGS);
+
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A0, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A1, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A2, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A3, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A4, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A5, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A6, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A7, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A8, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A9, PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A10,
+			PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A11,
+			PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A12,
+			PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A13,
+			PIN_EBI_ADDR_BUS_FLAG1);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A14,
+			PIN_EBI_ADDR_BUS_FLAG2);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A15,
+			PIN_EBI_ADDR_BUS_FLAG2);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A16,
+			PIN_EBI_ADDR_BUS_FLAG2);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A17,
+			PIN_EBI_ADDR_BUS_FLAG2);
+	ioport_set_pin_peripheral_mode(PIN_EBI_ADDR_BUS_A18,
+			PIN_EBI_ADDR_BUS_FLAG2);
 #endif
+
+#ifdef CONF_BOARD_AT86RFX
+	ioport_set_pin_peripheral_mode(AT86RFX_SPI_MISO, SPI_MISO_FLAGS);
+	ioport_set_pin_peripheral_mode(AT86RFX_SPI_MOSI, SPI_MOSI_FLAGS);
+	ioport_set_pin_peripheral_mode(AT86RFX_SPI_SCK,  SPI_SPCK_FLAGS);
+	ioport_set_pin_peripheral_mode(AT86RFX_SPI_CS_PIN, AT86RFX_SPI_CS_FLAGS);
+
+	/* Initialize TRX_RST and SLP_TR as GPIO. */
+	ioport_set_pin_dir(AT86RFX_RST_PIN, IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(AT86RFX_RST_PIN, IOPORT_PIN_LEVEL_HIGH);
+	ioport_set_pin_dir(AT86RFX_SLP_PIN, IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(AT86RFX_SLP_PIN, IOPORT_PIN_LEVEL_HIGH);
+#endif  
+
+#if (defined(CONF_BOARD_TWI0) || defined(CONF_BOARD_EDBG_TWI))
+	ioport_set_pin_peripheral_mode(TWI0_DATA_GPIO, TWI0_DATA_FLAGS);
+	ioport_set_pin_peripheral_mode(TWI0_CLK_GPIO, TWI0_CLK_FLAGS);
+#endif
+
 }

@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief SAM4E-EK LEDs support package.
+ * \brief SAM4E-XPRO LEDs support package.
  *
  * Copyright (c) 2014-2018 Microchip Technology Inc. and its subsidiaries.
  *
