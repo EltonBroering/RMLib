@@ -37,4 +37,11 @@
 /* Configure UART pins */
 #define CONF_BOARD_UART_CONSOLE
 
+/** LED definition */
+#define LED_MASK  PIN_LED_0_MASK
+#define LED_PIO   PIN_LED_0_PIO
+#define LED_ID    PIN_LED_0_ID
+#define LED_TYPE  PIN_LED_0_TYPE
+#define LED_ATTR  PIN_LED_0_ATTR
+
 #endif /* CONF_BOARD_H */

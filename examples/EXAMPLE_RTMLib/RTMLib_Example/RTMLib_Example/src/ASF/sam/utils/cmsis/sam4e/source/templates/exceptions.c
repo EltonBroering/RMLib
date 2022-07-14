@@ -195,7 +195,8 @@ void UART1_Handler  ( void ) __attribute__ ((weak, alias("Dummy_Handler")));
  */
 void Dummy_Handler(void)
 {
-	while (1) {
+	while (1)
+	{
 	}
 }
 
@@ -204,7 +205,8 @@ void Dummy_Handler(void)
  */
 void HardFault_Handler(void)
 {
-	while (1) {
+	while (1)
+	{
 	}
 }
 

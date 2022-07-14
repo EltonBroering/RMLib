@@ -115,6 +115,9 @@ uint32_t		task_communication_count_messages = 0;
 pv_type_actuation	controller_ouput;
 pv_msg_input		controller_input;
 
+/** LED blink time 300ms */
+#define BLINK_PERIOD                      300
+
 /**
  * \brief Called if stack overflow during execution
  */
@@ -161,6 +164,16 @@ void rtmlib_export_data(void * buffer_rtmlib)
 	memcpy(&QueueTimeStampsBufferDumped,buffer_rtmlib,(size_t)(SIZE_RUN_TIME_BUFFER_QUEUE*sizeof(TimeStamp_t)));
 	
 	task_communication_count_messages = SIZE_RUN_TIME_BUFFER_QUEUE;
+}
+
+
+/**
+ *  \brief Configure LED.
+ */
+static void configure_led(void)
+{
+	/* Configure PIOs for LED. */
+	pio_configure(LED_PIO, LED_TYPE, LED_MASK, LED_ATTR);
 }
 
 /**
@@ -214,14 +227,20 @@ static void task_dummy2(void *pvParameters)
 static void task_led(void *pvParameters)
 {
 	UNUSED(pvParameters);
+	
+	uint32_t ticks_toggle_led;
+	
+	configure_led();
+	
 	for (;;)
 	{
 		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED);
-		#if SAM4CM
-		LED_Toggle(LED4);
-		#else
-		LED_Toggle(LED0);
-		#endif
+		/* Toggle LED at the given period. */
+		if((ReadCounterHundredsMicroSeconds() - ticks_toggle_led) > BLINK_PERIOD)
+		{
+			ticks_toggle_led = ReadCounterHundredsMicroSeconds();
+			LED_Toggle(LED0);
+		}
 		vTaskDelay(10);
 	}
 }
@@ -256,7 +275,6 @@ int main(void)
 	/* Initialize the SAM system */
 	sysclk_init();
 	board_init();
-
 	
 	/* Call a local utility routine to initialize C-Library Standard I/O over
 	* a USB CDC protocol. Tunable parameters in a conf_usb.h file must be
@@ -302,7 +320,7 @@ int main(void)
 	TASK_DUMMY_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create dummy task\r\n");
 	}
-
+	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
