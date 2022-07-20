@@ -95,11 +95,18 @@
 #define TASK_DUMMY_STACK_SIZE					(configMINIMAL_STACK_SIZE)
 #define TASK_DUMMY_STACK_PRIORITY				(tskIDLE_PRIORITY+1)
 
-#define TASK_IDENTIFIER_CONTROLLER			1
-#define TASK_IDENTIFIER_BLINK_LED			2
-#define TASK_IDENTIFIER_COMMUNICATION		3
-#define TASK_IDENTIFIER_DUMMY_1				4
-#define TASK_IDENTIFIER_DUMMY_2				5
+#define TASK_IDENTIFIER_CONTROLLER				1
+#define TASK_IDENTIFIER_BLINK_LED				2
+#define TASK_IDENTIFIER_COMMUNICATION			3
+#define TASK_IDENTIFIER_DUMMY_1					4
+#define TASK_IDENTIFIER_DUMMY_2					5
+
+#define TASK_CONTROLLER_WORST_CASE				200
+#define TASK_BLINK_LED_WORST_CASE				200
+#define TASK_COMMUNICATION_WORST_CASE			200
+#define TASK_DUMMY_1_WORST_CASE					200
+#define TASK_DUMMY_2_WORST_CASE					200
+
 
 
 extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,
@@ -116,7 +123,9 @@ pv_type_actuation	controller_ouput;
 pv_msg_input		controller_input;
 
 /** LED blink time 300ms */
-#define BLINK_PERIOD                      300
+#define BLINK_PERIOD						300
+
+#define MS_COUNTS_DUMMY						1300
 
 /**
  * \brief Called if stack overflow during execution
@@ -189,7 +198,12 @@ static void task_controller(void *pvParameters)
 	{
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
 		c_control_lqrArthur_controller(&controller_input,&controller_ouput);
-		vTaskDelay(10);
+		uint32_t count_tmp = 0;
+		while(count_tmp <  TASK_CONTROLLER_WORST_CASE*MS_COUNTS_DUMMY)
+		{
+			count_tmp++;
+		}
+		//vTaskDelay(10);
 	}
 }
 
@@ -203,7 +217,12 @@ static void task_dummy1(void *pvParameters)
 	for (;;)
 	{
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_1);
-		vTaskDelay(10);
+		uint32_t count_tmp = 0;
+		while(count_tmp <  TASK_DUMMY_2_WORST_CASE*MS_COUNTS_DUMMY)
+		{
+			count_tmp++;
+		}
+		//vTaskDelay(10);
 	}
 }
 
@@ -214,10 +233,16 @@ static void task_dummy2(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
+	
 	for (;;)
 	{
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_2);
-		vTaskDelay(10);
+		uint32_t count_tmp = 0;
+		while(count_tmp <  TASK_DUMMY_1_WORST_CASE*MS_COUNTS_DUMMY)
+		{
+			count_tmp++;
+		}
+		//vTaskDelay(10);
 	}
 }
 
@@ -241,7 +266,12 @@ static void task_led(void *pvParameters)
 			ticks_toggle_led = ReadCounterHundredsMicroSeconds();
 			LED_Toggle(LED0);
 		}
-		vTaskDelay(10);
+		uint32_t count_tmp = 0;
+		while(count_tmp <  TASK_BLINK_LED_WORST_CASE*MS_COUNTS_DUMMY)
+		{
+			count_tmp++;
+		}
+		//vTaskDelay(10);
 	}
 }
 
@@ -260,7 +290,12 @@ static void task_communication(void *pvParameters)
 			printf("{\"TaskIdentifier\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped[(task_communication_count_messages-1)].Identifier_of_Task,QueueTimeStampsBufferDumped[(task_communication_count_messages-1)].TimeStamp);
 			task_communication_count_messages--;
 		}
-		vTaskDelay(10);
+		uint32_t count_tmp = 0;
+		while(count_tmp <  TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY)
+		{
+			count_tmp++;
+		}
+		//vTaskDelay(10);
 	}
 }
 
