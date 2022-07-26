@@ -152,15 +152,17 @@ int8_t timestamp_runtime(uint32_t Identifier_of_Task)
 	TimeStampInsert.Identifier_of_Task = Identifier_of_Task;
 	TimeStampInsert.TimeStamp = ReadCounterHundredsMicroSeconds();
 	int8_t return_function = cb_push_back(&QueueTimeStamps,&TimeStampInsert);
-	
-	if(cb_size(&QueueTimeStamps) == SIZE_RUN_TIME_BUFFER_QUEUE)
-	{
-		dump_buffer_timestamp();
-	}
 	portEXIT_CRITICAL();
 	return return_function;
 }
 
+int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib)
+{
+	portENTER_CRITICAL();
+	int8_t return_function = cb_pop_front(&QueueTimeStamps,buffer_rtmlib);
+	portEXIT_CRITICAL();
+	return return_function;
+}
 
 /**
  * \brief Init RMLib

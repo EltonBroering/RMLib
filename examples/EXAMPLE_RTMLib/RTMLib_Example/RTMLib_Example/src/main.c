@@ -87,25 +87,34 @@
 #include "Includes.h"
 
 #define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
-#define TASK_CONTROLLER_STACK_PRIORITY			(tskIDLE_PRIORITY+1)
-#define TASK_LED_STACK_SIZE						(configMINIMAL_STACK_SIZE)
-#define TASK_LED_STACK_PRIORITY					(tskIDLE_PRIORITY+1)
+#define TASK_CONTROLLER_STACK_PRIORITY			(tskIDLE_PRIORITY+2)
+#define TASK_LED_HLC_STACK_SIZE					(configMINIMAL_STACK_SIZE)
+#define TASK_LED_HLC_STACK_PRIORITY				(tskIDLE_PRIORITY+3)
 #define TASK_COMMUNICATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
 #define TASK_COMMUNICATION_STACK_PRIORITY		(tskIDLE_PRIORITY+1)
-#define TASK_DUMMY_STACK_SIZE					(configMINIMAL_STACK_SIZE)
-#define TASK_DUMMY_STACK_PRIORITY				(tskIDLE_PRIORITY+1)
+#define TASK_DUMMY_ACTUATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
+#define TASK_DUMMY_ACTUATION_STACK_PRIORITY		(tskIDLE_PRIORITY+5)
+#define TASK_DUMMY_SENSING_STACK_SIZE			(configMINIMAL_STACK_SIZE)
+#define TASK_DUMMY_SENSING_STACK_PRIORITY		(tskIDLE_PRIORITY+4)
 
-#define TASK_IDENTIFIER_CONTROLLER				1
-#define TASK_IDENTIFIER_BLINK_LED				2
-#define TASK_IDENTIFIER_COMMUNICATION			3
-#define TASK_IDENTIFIER_DUMMY_1					4
-#define TASK_IDENTIFIER_DUMMY_2					5
 
-#define TASK_CONTROLLER_WORST_CASE				200
-#define TASK_BLINK_LED_WORST_CASE				200
-#define TASK_COMMUNICATION_WORST_CASE			200
-#define TASK_DUMMY_1_WORST_CASE					200
-#define TASK_DUMMY_2_WORST_CASE					200
+#define TASK_IDENTIFIER_CONTROLLER				3
+#define TASK_IDENTIFIER_BLINK_LED_HLC			4
+#define TASK_IDENTIFIER_COMMUNICATION			5
+#define TASK_IDENTIFIER_DUMMY_ACTUATION			1
+#define TASK_IDENTIFIER_DUMMY_SENSING			2
+
+#define TASK_CONTROLLER_WORST_CASE				4
+#define TASK_BLINK_LED_HLC_WORST_CASE			4
+#define TASK_COMMUNICATION_WORST_CASE			125
+#define TASK_DUMMY_ACTUATION_WORST_CASE			2
+#define TASK_DUMMY_SENSING_WORST_CASE			3
+
+#define TASK_CONTROLLER_PERIOD					12
+#define TASK_BLINK_LED_HLC_PERIOD				120
+#define TASK_COMMUNICATION_PERIOD				600
+#define TASK_DUMMY_ACTUATION_PERIOD				12
+#define TASK_DUMMY_SENSING_PERIOD				12
 
 
 
@@ -116,8 +125,7 @@ extern void vApplicationTickHook(void);
 extern void vApplicationMallocFailedHook(void);
 extern void xPortSysTickHandler(void);
 
-TimeStamp_t		QueueTimeStampsBufferDumped[SIZE_RUN_TIME_BUFFER_QUEUE];
-uint32_t		task_communication_count_messages = 0;
+TimeStamp_t		QueueTimeStampsBufferDumped;
 
 pv_type_actuation	controller_ouput;
 pv_msg_input		controller_input;
@@ -168,12 +176,6 @@ extern void vApplicationMallocFailedHook(void)
 	configASSERT( ( volatile void * ) NULL );
 }
 
-void rtmlib_export_data(void * buffer_rtmlib)
-{
-	memcpy(&QueueTimeStampsBufferDumped,buffer_rtmlib,(size_t)(SIZE_RUN_TIME_BUFFER_QUEUE*sizeof(TimeStamp_t)));
-	
-	task_communication_count_messages = SIZE_RUN_TIME_BUFFER_QUEUE;
-}
 
 
 /**
@@ -203,53 +205,52 @@ static void task_controller(void *pvParameters)
 		{
 			count_tmp++;
 		}
-		//vTaskDelay(10);
+		vTaskDelay(TASK_CONTROLLER_PERIOD);
 	}
 }
 
 /**
- * \brief Task Dummy 1
+ * \brief Task Dummy Actuation
  */
-static void task_dummy1(void *pvParameters)
+static void task_dummy_actuation(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
 	for (;;)
 	{
-		timestamp_runtime(TASK_IDENTIFIER_DUMMY_1);
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION);
 		uint32_t count_tmp = 0;
-		while(count_tmp <  TASK_DUMMY_2_WORST_CASE*MS_COUNTS_DUMMY)
+		while(count_tmp <  TASK_DUMMY_ACTUATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		//vTaskDelay(10);
+		vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD);
 	}
 }
 
 /**
- * \brief Task Dummy 2
+ * \brief Task Dummy Sensing
  */
-static void task_dummy2(void *pvParameters)
+static void task_dummy_sensing(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
-	
 	for (;;)
 	{
-		timestamp_runtime(TASK_IDENTIFIER_DUMMY_2);
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING);
 		uint32_t count_tmp = 0;
-		while(count_tmp <  TASK_DUMMY_1_WORST_CASE*MS_COUNTS_DUMMY)
+		while(count_tmp <  TASK_DUMMY_SENSING_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		//vTaskDelay(10);
+		vTaskDelay(TASK_DUMMY_SENSING_PERIOD);
 	}
 }
 
 /**
  * \brief This task, when activated, make LED blink at a fixed rate
  */
-static void task_led(void *pvParameters)
+static void task_led_hlc(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
@@ -259,7 +260,7 @@ static void task_led(void *pvParameters)
 	
 	for (;;)
 	{
-		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED);
+		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC);
 		/* Toggle LED at the given period. */
 		if((ReadCounterHundredsMicroSeconds() - ticks_toggle_led) > BLINK_PERIOD)
 		{
@@ -267,11 +268,11 @@ static void task_led(void *pvParameters)
 			LED_Toggle(LED0);
 		}
 		uint32_t count_tmp = 0;
-		while(count_tmp <  TASK_BLINK_LED_WORST_CASE*MS_COUNTS_DUMMY)
+		while(count_tmp <  TASK_BLINK_LED_HLC_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		//vTaskDelay(10);
+		vTaskDelay(TASK_BLINK_LED_HLC_PERIOD);
 	}
 }
 
@@ -285,17 +286,17 @@ static void task_communication(void *pvParameters)
 	for (;;)
 	{
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION);
-		while(task_communication_count_messages)
-		{
-			printf("{\"TaskIdentifier\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped[(task_communication_count_messages-1)].Identifier_of_Task,QueueTimeStampsBufferDumped[(task_communication_count_messages-1)].TimeStamp);
-			task_communication_count_messages--;
-		}
 		uint32_t count_tmp = 0;
+		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
+		{
+			count_tmp++;
+			printf("{\"TaskIdentifier\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped.Identifier_of_Task,QueueTimeStampsBufferDumped.TimeStamp);
+		}
 		while(count_tmp <  TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		//vTaskDelay(10);
+		vTaskDelay(TASK_COMMUNICATION_PERIOD);
 	}
 }
 
@@ -339,20 +340,20 @@ int main(void)
 	}
 
 	/* Create task to make led blink */
-	if (xTaskCreate(task_led, "Led", TASK_LED_STACK_SIZE, NULL,
-			TASK_LED_STACK_PRIORITY, NULL) != pdPASS) {
+	if (xTaskCreate(task_led_hlc, "Led", TASK_LED_HLC_STACK_SIZE, NULL,
+			TASK_LED_HLC_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create led task\r\n");
 	}
 	
-	/* Create task to make Dummy 1 */
-	if (xTaskCreate(task_dummy1, "Dummy 1", TASK_DUMMY_STACK_SIZE, NULL,
-	TASK_DUMMY_STACK_PRIORITY, NULL) != pdPASS) {
+	/* Create task to make Dummy Sensing */
+	if (xTaskCreate(task_dummy_sensing, "Dummy Sensing", TASK_DUMMY_SENSING_STACK_SIZE, NULL,
+	TASK_DUMMY_SENSING_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create dummy task\r\n");
 	}
 	
-	/* Create task to make Dummy 2 */
-	if (xTaskCreate(task_dummy2, "Dummy 2", TASK_DUMMY_STACK_SIZE, NULL,
-	TASK_DUMMY_STACK_PRIORITY, NULL) != pdPASS) {
+	/* Create task to make Dummy Actuation */
+	if (xTaskCreate(task_dummy_actuation, "Dummy Actuation", TASK_DUMMY_ACTUATION_STACK_SIZE, NULL,
+	TASK_DUMMY_ACTUATION_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create dummy task\r\n");
 	}
 	
