@@ -198,6 +198,7 @@ static void task_controller(void *pvParameters)
 	
 	for (;;)
 	{
+		portENTER_CRITICAL();
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
 		c_control_lqrArthur_controller(&controller_input,&controller_ouput);
 		uint32_t count_tmp = 0;
@@ -205,6 +206,7 @@ static void task_controller(void *pvParameters)
 		{
 			count_tmp++;
 		}
+		portEXIT_CRITICAL();
 		vTaskDelay(TASK_CONTROLLER_PERIOD);
 	}
 }
@@ -218,12 +220,14 @@ static void task_dummy_actuation(void *pvParameters)
 	
 	for (;;)
 	{
+		portENTER_CRITICAL();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  TASK_DUMMY_ACTUATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
+		portEXIT_CRITICAL();
 		vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD);
 	}
 }
@@ -237,12 +241,14 @@ static void task_dummy_sensing(void *pvParameters)
 	
 	for (;;)
 	{
+		portENTER_CRITICAL();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  TASK_DUMMY_SENSING_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
+		portEXIT_CRITICAL();
 		vTaskDelay(TASK_DUMMY_SENSING_PERIOD);
 	}
 }
@@ -260,6 +266,7 @@ static void task_led_hlc(void *pvParameters)
 	
 	for (;;)
 	{
+		portENTER_CRITICAL();
 		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC);
 		/* Toggle LED at the given period. */
 		if((ReadCounterHundredsMicroSeconds() - ticks_toggle_led) > BLINK_PERIOD)
@@ -272,6 +279,7 @@ static void task_led_hlc(void *pvParameters)
 		{
 			count_tmp++;
 		}
+		portEXIT_CRITICAL();
 		vTaskDelay(TASK_BLINK_LED_HLC_PERIOD);
 	}
 }
