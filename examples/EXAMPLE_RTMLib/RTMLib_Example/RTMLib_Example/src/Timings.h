@@ -8,6 +8,8 @@
 #include "Includes.h"
 
 
+#define SYSTEM_TIMER_COUNT_SCALE		1000
+
 /*                          ***********************
  *************************** Module: TIMINGS (HEADER) ******************
  *                          ***********************
@@ -18,6 +20,7 @@
  *
  *****************************************************************************/
 
+void Timer_init();
 
 uint32_t ReadCounterHundredsMicroSeconds(void);
 

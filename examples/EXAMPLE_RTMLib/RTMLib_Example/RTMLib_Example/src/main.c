@@ -133,7 +133,7 @@ pv_msg_input		controller_input;
 /** LED blink time 300ms */
 #define BLINK_PERIOD						300
 
-#define MS_COUNTS_DUMMY						1300
+#define MS_COUNTS_DUMMY						6500
 
 /**
  * \brief Called if stack overflow during execution
@@ -198,7 +198,7 @@ static void task_controller(void *pvParameters)
 	
 	for (;;)
 	{
-		portENTER_CRITICAL();
+		vTaskSuspendAll();
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
 		c_control_lqrArthur_controller(&controller_input,&controller_ouput);
 		uint32_t count_tmp = 0;
@@ -206,8 +206,9 @@ static void task_controller(void *pvParameters)
 		{
 			count_tmp++;
 		}
-		portEXIT_CRITICAL();
-		vTaskDelay(TASK_CONTROLLER_PERIOD);
+		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
+		xTaskResumeAll();
+		vTaskDelay(TASK_CONTROLLER_PERIOD - TASK_CONTROLLER_WORST_CASE);
 	}
 }
 
@@ -220,15 +221,16 @@ static void task_dummy_actuation(void *pvParameters)
 	
 	for (;;)
 	{
-		portENTER_CRITICAL();
+		vTaskSuspendAll();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  TASK_DUMMY_ACTUATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		portEXIT_CRITICAL();
-		vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD);
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION);
+		xTaskResumeAll();
+		vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD - TASK_DUMMY_ACTUATION_WORST_CASE);
 	}
 }
 
@@ -241,15 +243,16 @@ static void task_dummy_sensing(void *pvParameters)
 	
 	for (;;)
 	{
-		portENTER_CRITICAL();
+		vTaskSuspendAll();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  TASK_DUMMY_SENSING_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		portEXIT_CRITICAL();
-		vTaskDelay(TASK_DUMMY_SENSING_PERIOD);
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING);
+		xTaskResumeAll();
+		vTaskDelay(TASK_DUMMY_SENSING_PERIOD - TASK_DUMMY_SENSING_WORST_CASE);
 	}
 }
 
@@ -266,7 +269,7 @@ static void task_led_hlc(void *pvParameters)
 	
 	for (;;)
 	{
-		portENTER_CRITICAL();
+		vTaskSuspendAll();
 		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC);
 		/* Toggle LED at the given period. */
 		if((ReadCounterHundredsMicroSeconds() - ticks_toggle_led) > BLINK_PERIOD)
@@ -279,8 +282,9 @@ static void task_led_hlc(void *pvParameters)
 		{
 			count_tmp++;
 		}
-		portEXIT_CRITICAL();
-		vTaskDelay(TASK_BLINK_LED_HLC_PERIOD);
+		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC);
+		xTaskResumeAll();
+		vTaskDelay(TASK_BLINK_LED_HLC_PERIOD - TASK_BLINK_LED_HLC_WORST_CASE);
 	}
 }
 
@@ -304,7 +308,8 @@ static void task_communication(void *pvParameters)
 		{
 			count_tmp++;
 		}
-		vTaskDelay(TASK_COMMUNICATION_PERIOD);
+		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION);
+		vTaskDelay(TASK_COMMUNICATION_PERIOD - TASK_COMMUNICATION_WORST_CASE);
 	}
 }
 
@@ -325,6 +330,8 @@ int main(void)
 	* supplied to configure the USB device correctly.
 	*/
 	stdio_usb_init();
+	
+	Timer_init();
 	
 	//Start RunTime Verification Lib
 	rtmlib_init();
