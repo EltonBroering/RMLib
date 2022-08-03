@@ -199,16 +199,17 @@ static void task_controller(void *pvParameters)
 	for (;;)
 	{
 		vTaskSuspendAll();
-		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
+		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
+		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER,TASK_INIT_EXECUTION);
 		c_control_lqrArthur_controller(&controller_input,&controller_ouput);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  TASK_CONTROLLER_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER);
+		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER,TASK_END_EXECUTION);
 		xTaskResumeAll();
-		vTaskDelay(TASK_CONTROLLER_PERIOD - TASK_CONTROLLER_WORST_CASE);
+		vTaskDelay(TASK_CONTROLLER_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
 	}
 }
 
@@ -222,15 +223,16 @@ static void task_dummy_actuation(void *pvParameters)
 	for (;;)
 	{
 		vTaskSuspendAll();
-		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION);
+		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION,TASK_INIT_EXECUTION);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  TASK_DUMMY_ACTUATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION);
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION,TASK_END_EXECUTION);
 		xTaskResumeAll();
-		vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD - TASK_DUMMY_ACTUATION_WORST_CASE);
+		vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
 	}
 }
 
@@ -244,15 +246,16 @@ static void task_dummy_sensing(void *pvParameters)
 	for (;;)
 	{
 		vTaskSuspendAll();
-		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING);
+		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING,TASK_INIT_EXECUTION);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  TASK_DUMMY_SENSING_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING);
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING,TASK_END_EXECUTION);
 		xTaskResumeAll();
-		vTaskDelay(TASK_DUMMY_SENSING_PERIOD - TASK_DUMMY_SENSING_WORST_CASE);
+		vTaskDelay(TASK_DUMMY_SENSING_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
 	}
 }
 
@@ -270,7 +273,8 @@ static void task_led_hlc(void *pvParameters)
 	for (;;)
 	{
 		vTaskSuspendAll();
-		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC);
+		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
+		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC,TASK_INIT_EXECUTION);
 		/* Toggle LED at the given period. */
 		if((ReadCounterHundredsMicroSeconds() - ticks_toggle_led) > BLINK_PERIOD)
 		{
@@ -282,9 +286,9 @@ static void task_led_hlc(void *pvParameters)
 		{
 			count_tmp++;
 		}
-		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC);
+		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC,TASK_END_EXECUTION);
 		xTaskResumeAll();
-		vTaskDelay(TASK_BLINK_LED_HLC_PERIOD - TASK_BLINK_LED_HLC_WORST_CASE);
+		vTaskDelay(TASK_BLINK_LED_HLC_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
 	}
 }
 
@@ -297,19 +301,20 @@ static void task_communication(void *pvParameters)
 	
 	for (;;)
 	{
-		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION);
+		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
+		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_INIT_EXECUTION);
 		uint32_t count_tmp = 0;
 		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
 		{
 			count_tmp++;
-			printf("{\"TaskIdentifier\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped.Identifier_of_Task,QueueTimeStampsBufferDumped.TimeStamp);
+			printf("{\"TaskIdentifier\" : %d,\"TaskStated\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped.Identifier_of_Task,QueueTimeStampsBufferDumped.State_of_Task,QueueTimeStampsBufferDumped.TimeStamp);
 		}
 		while(count_tmp <  TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
 		}
-		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION);
-		vTaskDelay(TASK_COMMUNICATION_PERIOD - TASK_COMMUNICATION_WORST_CASE);
+		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_END_EXECUTION);
+		vTaskDelay(TASK_COMMUNICATION_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
 	}
 }
 

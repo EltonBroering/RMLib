@@ -141,14 +141,16 @@ void dump_buffer_timestamp()
  *
  * \param TimeStamp - Pointer to Circular Queue structure
  * \param Identifier_of_Task - Identifier of task
+ * \param task_state - Identifier of task
  * \return Return status of requested action 
  *     @retval COMMAND_OK		Indicates that the item was successfully
  *     @retval COMMAND_NOK		Indicates that the item could not be do
  *     @retval COMMAND_ERROR	Event error
  */
-int8_t timestamp_runtime(uint32_t Identifier_of_Task)
+int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 {
-	TimeStampInsert.Identifier_of_Task = Identifier_of_Task;
+	TimeStampInsert.Identifier_of_Task = task_identifier;
+	TimeStampInsert.State_of_Task = task_state;
 	TimeStampInsert.TimeStamp = ReadCounterHundredsMicroSeconds();
 	int8_t return_function = cb_push_back(&QueueTimeStamps,&TimeStampInsert);
 	return return_function;
