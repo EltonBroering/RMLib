@@ -42,7 +42,9 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state);
 
 int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib);
 
-extern uint32_t ReadCounterHundredsMicroSeconds(void); 
+const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib);
+
+extern uint32_t ReadCounterHundredsMicroSeconds(void);
 #endif
 
 

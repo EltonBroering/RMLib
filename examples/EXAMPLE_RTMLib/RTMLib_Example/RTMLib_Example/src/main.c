@@ -131,7 +131,7 @@ pv_type_actuation	controller_ouput;
 pv_msg_input		controller_input;
 
 /** LED blink time 300ms */
-#define BLINK_PERIOD						300
+#define BLINK_PERIOD						10
 
 #define MS_COUNTS_DUMMY						6500
 
@@ -196,7 +196,7 @@ static void task_controller(void *pvParameters)
 	
 	c_control_lqrArthur_init();
 	
-	for (;;)
+	while(true)
 	{
 		vTaskSuspendAll();
 		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
@@ -208,8 +208,12 @@ static void task_controller(void *pvParameters)
 			count_tmp++;
 		}
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER,TASK_END_EXECUTION);
+		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
 		xTaskResumeAll();
-		vTaskDelay(TASK_CONTROLLER_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
+		if(TASK_CONTROLLER_PERIOD > time_task_end)
+		{
+			vTaskDelay(TASK_CONTROLLER_PERIOD - time_task_end);
+		}
 	}
 }
 
@@ -220,7 +224,7 @@ static void task_dummy_actuation(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
-	for (;;)
+	while(true)
 	{
 		vTaskSuspendAll();
 		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
@@ -231,8 +235,12 @@ static void task_dummy_actuation(void *pvParameters)
 			count_tmp++;
 		}
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION,TASK_END_EXECUTION);
+		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
 		xTaskResumeAll();
-		vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
+		if(TASK_DUMMY_ACTUATION_PERIOD > time_task_end)
+		{
+			vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD - time_task_end);
+		}
 	}
 }
 
@@ -243,7 +251,7 @@ static void task_dummy_sensing(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
-	for (;;)
+	while(true)
 	{
 		vTaskSuspendAll();
 		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
@@ -254,8 +262,12 @@ static void task_dummy_sensing(void *pvParameters)
 			count_tmp++;
 		}
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING,TASK_END_EXECUTION);
+		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
 		xTaskResumeAll();
-		vTaskDelay(TASK_DUMMY_SENSING_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
+		if(TASK_DUMMY_SENSING_PERIOD > time_task_end)
+		{
+			vTaskDelay(TASK_DUMMY_SENSING_PERIOD - time_task_end);
+		}
 	}
 }
 
@@ -270,7 +282,7 @@ static void task_led_hlc(void *pvParameters)
 	
 	configure_led();
 	
-	for (;;)
+	while(true)
 	{
 		vTaskSuspendAll();
 		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
@@ -287,8 +299,12 @@ static void task_led_hlc(void *pvParameters)
 			count_tmp++;
 		}
 		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC,TASK_END_EXECUTION);
+		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
 		xTaskResumeAll();
-		vTaskDelay(TASK_BLINK_LED_HLC_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
+		if(TASK_BLINK_LED_HLC_PERIOD > time_task_end)
+		{
+			vTaskDelay(TASK_BLINK_LED_HLC_PERIOD - time_task_end);
+		}
 	}
 }
 
@@ -299,7 +315,7 @@ static void task_communication(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
-	for (;;)
+	while(true)
 	{
 		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_INIT_EXECUTION);
@@ -307,14 +323,18 @@ static void task_communication(void *pvParameters)
 		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
 		{
 			count_tmp++;
-			printf("{\"TaskIdentifier\" : %d,\"TaskStated\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped.Identifier_of_Task,QueueTimeStampsBufferDumped.State_of_Task,QueueTimeStampsBufferDumped.TimeStamp);
+			printf("{\"TaskIdentifier\" : %d,\"TaskState\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped.Identifier_of_Task,QueueTimeStampsBufferDumped.State_of_Task,QueueTimeStampsBufferDumped.TimeStamp);
 		}
-		while(count_tmp <  TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY)
+		/*while(count_tmp <  TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
 			count_tmp++;
-		}
+		}*/
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_END_EXECUTION);
-		vTaskDelay(TASK_COMMUNICATION_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
+		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
+		if(TASK_COMMUNICATION_PERIOD > time_task_end)
+		{
+			vTaskDelay(TASK_COMMUNICATION_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
+		}
 	}
 }
 

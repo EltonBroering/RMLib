@@ -156,10 +156,31 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 	return return_function;
 }
 
+/**
+ * \brief Function to export TimeStamp, copying data to buffer in reference
+ *
+ * \param buffer_rtmlib - Pointer to TimeStamp structure
+ * \return Return status of requested action 
+ *     @retval COMMAND_OK		Indicates that the item was successfully
+ *     @retval COMMAND_NOK		Indicates that the item could not be do
+ *     @retval COMMAND_ERROR	Event error
+ */
 int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib)
 {
 	int8_t return_function = cb_pop_front(&QueueTimeStamps,buffer_rtmlib);
 	return return_function;
+}
+
+/**
+ * \brief Function to export TimeStamp, in String format used  to offline verification
+ *
+ * \param buffer_rtmlib - Pointer to TimeStamp structure
+ * \return String of TimeStamp structure in offline verirication format
+ */
+const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib)
+{
+	//TODO
+	return;
 }
 
 /**
