@@ -34,19 +34,21 @@ typedef struct PACKED
 	uint16_t		State_of_Task;
 } TimeStamp_t;
 
+int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state);
+
+extern uint32_t ReadCounterHundredsMicroSeconds(void);
+
 #ifdef OFFLINE_VERIFICATION
 // Init RMLib
 void rtmlib_init();
 
-int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state);
-
 int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib);
 
 const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib);
-
-extern uint32_t ReadCounterHundredsMicroSeconds(void);
 #endif
 
+#ifdef ONLINE_VERIFICATION
+#endif
 
 
 #endif /* RTMLIB_H_ */
