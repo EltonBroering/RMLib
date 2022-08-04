@@ -323,7 +323,7 @@ static void task_communication(void *pvParameters)
 		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
 		{
 			count_tmp++;
-			printf("{\"TaskIdentifier\" : %d,\"TaskState\" : %d,\"TimeStamp\" : %d}\n",QueueTimeStampsBufferDumped.Identifier_of_Task,QueueTimeStampsBufferDumped.State_of_Task,QueueTimeStampsBufferDumped.TimeStamp);
+			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
 		}
 		/*while(count_tmp <  TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY)
 		{
