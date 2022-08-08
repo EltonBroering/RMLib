@@ -106,7 +106,7 @@
 
 #define TASK_CONTROLLER_WORST_CASE				4
 #define TASK_BLINK_LED_HLC_WORST_CASE			4
-#define TASK_COMMUNICATION_WORST_CASE			125
+#define TASK_COMMUNICATION_WORST_CASE			135
 #define TASK_DUMMY_ACTUATION_WORST_CASE			2
 #define TASK_DUMMY_SENSING_WORST_CASE			3
 
@@ -203,7 +203,7 @@ static void task_controller(void *pvParameters)
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER,TASK_INIT_EXECUTION);
 		c_control_lqrArthur_controller(&controller_input,&controller_ouput);
 		uint32_t count_tmp = 0;
-		while(count_tmp <  TASK_CONTROLLER_WORST_CASE*MS_COUNTS_DUMMY)
+		while(count_tmp <  (TASK_CONTROLLER_WORST_CASE*MS_COUNTS_DUMMY))
 		{
 			count_tmp++;
 		}
@@ -230,7 +230,7 @@ static void task_dummy_actuation(void *pvParameters)
 		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION,TASK_INIT_EXECUTION);
 		uint32_t count_tmp = 0;
-		while(count_tmp <  TASK_DUMMY_ACTUATION_WORST_CASE*MS_COUNTS_DUMMY)
+		while(count_tmp <  (TASK_DUMMY_ACTUATION_WORST_CASE*MS_COUNTS_DUMMY))
 		{
 			count_tmp++;
 		}
@@ -257,7 +257,7 @@ static void task_dummy_sensing(void *pvParameters)
 		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING,TASK_INIT_EXECUTION);
 		uint32_t count_tmp = 0;
-		while(count_tmp <  TASK_DUMMY_SENSING_WORST_CASE*MS_COUNTS_DUMMY)
+		while(count_tmp <  (TASK_DUMMY_SENSING_WORST_CASE*MS_COUNTS_DUMMY))
 		{
 			count_tmp++;
 		}
@@ -294,7 +294,7 @@ static void task_led_hlc(void *pvParameters)
 			LED_Toggle(LED0);
 		}
 		uint32_t count_tmp = 0;
-		while(count_tmp <  TASK_BLINK_LED_HLC_WORST_CASE*MS_COUNTS_DUMMY)
+		while(count_tmp <  (TASK_BLINK_LED_HLC_WORST_CASE*MS_COUNTS_DUMMY))
 		{
 			count_tmp++;
 		}
@@ -325,16 +325,16 @@ static void task_communication(void *pvParameters)
 			count_tmp++;
 			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
 		}
-		/*while(count_tmp <  TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY)
+		/*while(count_tmp <  (TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY))
 		{
 			count_tmp++;
 		}*/
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_END_EXECUTION);
 		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
-		if(TASK_COMMUNICATION_PERIOD > time_task_end)
+		/*if(TASK_COMMUNICATION_PERIOD > time_task_end)
 		{
 			vTaskDelay(TASK_COMMUNICATION_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
-		}
+		}*/
 	}
 }
 

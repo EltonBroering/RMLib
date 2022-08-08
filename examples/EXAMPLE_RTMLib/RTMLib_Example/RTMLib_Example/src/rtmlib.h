@@ -11,7 +11,7 @@
 #include "Includes.h"
 
 
-#define SIZE_RUN_TIME_BUFFER_QUEUE		1000
+#define SIZE_RUN_TIME_BUFFER_QUEUE		10000
 
 #define COMMAND_OK						0			//Queued command was executed successfully (Insert/Remove)
 #define COMMAND_NOK						1			//Queued command cannot be executed (Insert with full queue / Remove with empty queue)
