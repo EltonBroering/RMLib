@@ -13,6 +13,9 @@
 
 #define SIZE_RUN_TIME_BUFFER_QUEUE		10000
 
+#define NUMBER_TASKS_RUNTIME_VERIFICATION	5
+
+
 #define COMMAND_OK						0			//Queued command was executed successfully (Insert/Remove)
 #define COMMAND_NOK						1			//Queued command cannot be executed (Insert with full queue / Remove with empty queue)
 #define COMMAND_ERROR					-1			//Error in the pointers of the queue that needs to be reinitialized
@@ -30,13 +33,18 @@
 typedef struct PACKED
 {
 	uint32_t		TimeStamp;
-	uint16_t		Identifier_of_Task;
-	uint16_t		State_of_Task;
+	uint32_t		CounterTask : 25;
+	uint8_t			Identifier_of_Task : 5;
+	uint8_t			State_of_Task : 2;
 } TimeStamp_t;
 
 int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state);
 
-extern uint32_t ReadCounterHundredsMicroSeconds(void);
+/**
+  * \brief Returns the value of the infinite Miliseconds counter.
+  * \return Miliseconds counter value.
+  */
+extern uint32_t ReadCounterMiliSeconds(void);
 
 #ifdef OFFLINE_VERIFICATION
 // Init RMLib
