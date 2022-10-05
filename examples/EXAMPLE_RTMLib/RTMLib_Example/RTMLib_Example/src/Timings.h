@@ -22,7 +22,7 @@
 
 void Timer_init();
 
-uint32_t ReadCounterHundredsMicroSeconds(void);
+uint32_t ReadCounterMiliSeconds(void);
 
 
 
