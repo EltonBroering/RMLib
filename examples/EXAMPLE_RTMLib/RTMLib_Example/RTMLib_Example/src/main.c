@@ -86,23 +86,27 @@
 #include "conf_board.h"
 #include "Includes.h"
 
+#define TASK_COMMUNICATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
+#define TASK_COMMUNICATION_STACK_PRIORITY		(tskIDLE_PRIORITY+1)
 #define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
 #define TASK_CONTROLLER_STACK_PRIORITY			(tskIDLE_PRIORITY+2)
 #define TASK_LED_HLC_STACK_SIZE					(configMINIMAL_STACK_SIZE)
 #define TASK_LED_HLC_STACK_PRIORITY				(tskIDLE_PRIORITY+3)
-#define TASK_COMMUNICATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_COMMUNICATION_STACK_PRIORITY		(tskIDLE_PRIORITY+1)
-#define TASK_DUMMY_ACTUATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_DUMMY_ACTUATION_STACK_PRIORITY		(tskIDLE_PRIORITY+5)
 #define TASK_DUMMY_SENSING_STACK_SIZE			(configMINIMAL_STACK_SIZE)
 #define TASK_DUMMY_SENSING_STACK_PRIORITY		(tskIDLE_PRIORITY+4)
+#define TASK_DUMMY_ACTUATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
+#define TASK_DUMMY_ACTUATION_STACK_PRIORITY		(tskIDLE_PRIORITY+5)
 
 
+#define TASK_IDENTIFIER_DUMMY_ACTUATION			1
+#define TASK_IDENTIFIER_DUMMY_SENSING			2
 #define TASK_IDENTIFIER_CONTROLLER				3
 #define TASK_IDENTIFIER_BLINK_LED_HLC			4
 #define TASK_IDENTIFIER_COMMUNICATION			5
-#define TASK_IDENTIFIER_DUMMY_ACTUATION			1
-#define TASK_IDENTIFIER_DUMMY_SENSING			2
+
+#define NUMBER_TASKS							5
+
+uint32_t counter_tasks_runtime[NUMBER_TASKS];
 
 #define TASK_CONTROLLER_WORST_CASE				4
 #define TASK_BLINK_LED_HLC_WORST_CASE			4
@@ -133,7 +137,7 @@ pv_msg_input		controller_input;
 /** LED blink time 300ms */
 #define BLINK_PERIOD						10
 
-#define MS_COUNTS_DUMMY						6500
+#define MS_COUNTS_DUMMY						7000
 
 /**
  * \brief Called if stack overflow during execution
@@ -199,21 +203,28 @@ static void task_controller(void *pvParameters)
 	while(true)
 	{
 		vTaskSuspendAll();
-		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER,TASK_INIT_EXECUTION);
-		c_control_lqrArthur_controller(&controller_input,&controller_ouput);
+		//c_control_lqrArthur_controller(&controller_input,&controller_ouput);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  (TASK_CONTROLLER_WORST_CASE*MS_COUNTS_DUMMY))
 		{
 			count_tmp++;
 		}
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER,TASK_END_EXECUTION);
-		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
-		xTaskResumeAll();
-		if(TASK_CONTROLLER_PERIOD > time_task_end)
+		counter_tasks_runtime[TASK_IDENTIFIER_CONTROLLER-1]++;
+		uint32_t MileSecondsTask = ReadCounterMiliSeconds();
+		uint32_t ValueTaskDelay;
+		
+		if((TASK_CONTROLLER_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_CONTROLLER-1]) > MileSecondsTask)
 		{
-			vTaskDelay(TASK_CONTROLLER_PERIOD - time_task_end);
+			ValueTaskDelay = (TASK_CONTROLLER_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_CONTROLLER-1] - MileSecondsTask);
 		}
+		else
+		{
+			ValueTaskDelay = 0;
+		}
+		vTaskDelay(ValueTaskDelay);
+		xTaskResumeAll();
 	}
 }
 
@@ -227,7 +238,6 @@ static void task_dummy_actuation(void *pvParameters)
 	while(true)
 	{
 		vTaskSuspendAll();
-		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION,TASK_INIT_EXECUTION);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  (TASK_DUMMY_ACTUATION_WORST_CASE*MS_COUNTS_DUMMY))
@@ -235,12 +245,21 @@ static void task_dummy_actuation(void *pvParameters)
 			count_tmp++;
 		}
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_ACTUATION,TASK_END_EXECUTION);
-		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
-		xTaskResumeAll();
-		if(TASK_DUMMY_ACTUATION_PERIOD > time_task_end)
+		counter_tasks_runtime[TASK_IDENTIFIER_DUMMY_ACTUATION-1]++;
+		uint32_t MileSecondsTask = ReadCounterMiliSeconds();
+		uint32_t ValueTaskDelay;
+		
+		if(TASK_DUMMY_ACTUATION_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_DUMMY_ACTUATION-1] > MileSecondsTask)
 		{
-			vTaskDelay(TASK_DUMMY_ACTUATION_PERIOD - time_task_end);
+			ValueTaskDelay = (TASK_DUMMY_ACTUATION_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_DUMMY_ACTUATION-1] - MileSecondsTask);
 		}
+		else
+		{
+			ValueTaskDelay = 0;
+		}
+		vTaskDelay(ValueTaskDelay);
+		xTaskResumeAll();
+		
 	}
 }
 
@@ -254,20 +273,27 @@ static void task_dummy_sensing(void *pvParameters)
 	while(true)
 	{
 		vTaskSuspendAll();
-		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING,TASK_INIT_EXECUTION);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  (TASK_DUMMY_SENSING_WORST_CASE*MS_COUNTS_DUMMY))
 		{
 			count_tmp++;
 		}
-		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING,TASK_END_EXECUTION);
-		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
-		xTaskResumeAll();
-		if(TASK_DUMMY_SENSING_PERIOD > time_task_end)
+		timestamp_runtime(TASK_IDENTIFIER_DUMMY_SENSING,TASK_END_EXECUTION);		
+		counter_tasks_runtime[TASK_IDENTIFIER_DUMMY_SENSING-1]++;
+		uint32_t MileSecondsTask = ReadCounterMiliSeconds();
+		uint32_t ValueTaskDelay;
+		
+		if(TASK_DUMMY_SENSING_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_DUMMY_SENSING-1] > MileSecondsTask)
 		{
-			vTaskDelay(TASK_DUMMY_SENSING_PERIOD - time_task_end);
+			ValueTaskDelay = (TASK_DUMMY_SENSING_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_DUMMY_SENSING-1] - MileSecondsTask);
 		}
+		else
+		{
+			ValueTaskDelay = 0;
+		}
+		vTaskDelay(ValueTaskDelay);
+		xTaskResumeAll();
 	}
 }
 
@@ -285,12 +311,11 @@ static void task_led_hlc(void *pvParameters)
 	while(true)
 	{
 		vTaskSuspendAll();
-		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC,TASK_INIT_EXECUTION);
 		/* Toggle LED at the given period. */
-		if((ReadCounterHundredsMicroSeconds() - ticks_toggle_led) > BLINK_PERIOD)
+		if((ReadCounterMiliSeconds() - ticks_toggle_led) > BLINK_PERIOD)
 		{
-			ticks_toggle_led = ReadCounterHundredsMicroSeconds();
+			ticks_toggle_led = ReadCounterMiliSeconds();
 			LED_Toggle(LED0);
 		}
 		uint32_t count_tmp = 0;
@@ -299,12 +324,20 @@ static void task_led_hlc(void *pvParameters)
 			count_tmp++;
 		}
 		timestamp_runtime(TASK_IDENTIFIER_BLINK_LED_HLC,TASK_END_EXECUTION);
-		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
-		xTaskResumeAll();
-		if(TASK_BLINK_LED_HLC_PERIOD > time_task_end)
+		counter_tasks_runtime[TASK_IDENTIFIER_BLINK_LED_HLC-1]++;
+		uint32_t MileSecondsTask = ReadCounterMiliSeconds();
+		uint32_t ValueTaskDelay;
+		
+		if(TASK_BLINK_LED_HLC_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_BLINK_LED_HLC-1] > MileSecondsTask)
 		{
-			vTaskDelay(TASK_BLINK_LED_HLC_PERIOD - time_task_end);
+			ValueTaskDelay = ((TASK_BLINK_LED_HLC_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_BLINK_LED_HLC-1]) - MileSecondsTask);
 		}
+		else
+		{
+			ValueTaskDelay = 0;
+		}
+		vTaskDelay(ValueTaskDelay);
+		xTaskResumeAll();
 	}
 }
 
@@ -317,24 +350,15 @@ static void task_communication(void *pvParameters)
 	
 	while(true)
 	{
-		uint32_t time_task_init = ReadCounterHundredsMicroSeconds();
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_INIT_EXECUTION);
-		uint32_t count_tmp = 0;
 		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
 		{
-			count_tmp++;
 			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
 		}
-		/*while(count_tmp <  (TASK_COMMUNICATION_WORST_CASE*MS_COUNTS_DUMMY))
-		{
-			count_tmp++;
-		}*/
+
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_END_EXECUTION);
-		uint32_t time_task_end =  ReadCounterHundredsMicroSeconds() - time_task_init;
-		/*if(TASK_COMMUNICATION_PERIOD > time_task_end)
-		{
-			vTaskDelay(TASK_COMMUNICATION_PERIOD - (ReadCounterHundredsMicroSeconds() - time_task_init));
-		}*/
+		counter_tasks_runtime[TASK_IDENTIFIER_COMMUNICATION-1]++;
+		vTaskDelay(10);
 	}
 }
 
@@ -365,7 +389,7 @@ int main(void)
 	printf("-- Freertos Example --\n\r");
 	printf("-- %s\n\r", BOARD_NAME);
 	printf("-- Compiled: %s %s --\n\r", __DATE__, __TIME__);
-
+	
 
 	/* Create task to controller */
 	if (xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL,

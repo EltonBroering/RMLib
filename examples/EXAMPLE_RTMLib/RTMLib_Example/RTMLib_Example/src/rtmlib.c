@@ -23,6 +23,8 @@ CircularBuffer_t	QueueTimeStamps;		//Circular queue with timestamps
 TimeStamp_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
 TimeStamp_t			TimeStampInsert;
 
+uint32_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
+
 /**
  * \brief Function that initializes the circular queue
  *
@@ -151,14 +153,18 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 {
 	TimeStampInsert.Identifier_of_Task = task_identifier;
 	TimeStampInsert.State_of_Task = task_state;
-	TimeStampInsert.TimeStamp = ReadCounterHundredsMicroSeconds();
+	TimeStampInsert.TimeStamp = ReadCounterMiliSeconds();
+	if(task_state == TASK_END_EXECUTION)
+	{
+		counter_tasks_runtime_verification[task_identifier-1]++;
+	}
+	TimeStampInsert.CounterTask = counter_tasks_runtime_verification[task_identifier-1];
 	int8_t return_function = cb_push_back(&QueueTimeStamps,&TimeStampInsert);
 	return return_function;
 }
 
 /**
  * \brief Function to export TimeStamp, copying data to buffer in reference
- *
  * \param buffer_rtmlib - Pointer to TimeStamp structure
  * \return Return status of requested action 
  *     @retval COMMAND_OK		Indicates that the item was successfully
@@ -173,21 +179,21 @@ int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib)
 
 /**
  * \brief Function to export TimeStamp, in String format used  to offline verification
- *
  * \param buffer_rtmlib - Pointer to TimeStamp structure
  * \return String of TimeStamp structure in offline verirication format
  */
 const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib)
 {
-	printf("{\"TaskIdentifier\" : %d,\"TaskState\" : %d,\"TimeStamp\" : %d}\n",buffer_rtmlib->Identifier_of_Task,buffer_rtmlib->State_of_Task,buffer_rtmlib->TimeStamp);
+	printf("{\"TaskIdentifier\" : %d,\"TaskState\" : %d,\"TimeStamp\" : %d,\"TaskCounter\" : %d}\n",buffer_rtmlib->Identifier_of_Task,buffer_rtmlib->State_of_Task,buffer_rtmlib->TimeStamp,buffer_rtmlib->CounterTask);
 	return;
 }
 
 /**
  * \brief Init RMLib
- *
 **/
 void rtmlib_init()
 {
 	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStamp_t));
+	
+	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint32_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
 }

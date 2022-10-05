@@ -41,11 +41,10 @@ void TC0_Handler(void)
 }
 
 /**
-  * \brief Returns the value of the infinite hundredths of microsecond counter.
-  *
-  * \return Hundredths of microsecond counter value.
+  * \brief Returns the value of the infinite Miliseconds counter.
+  * \return Miliseconds counter value.
   */
-uint32_t ReadCounterHundredsMicroSeconds(void)
+uint32_t ReadCounterMiliSeconds(void)
 {
 	return g_ul_ms_ticks;
 }
