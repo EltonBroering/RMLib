@@ -25,6 +25,8 @@
 
 //#define				ONLINE_VERIFICATION
 
+#define				OPTIMIZE_EXPORT_DATA
+
 #ifndef ONLINE_VERIFICATION
 #define				OFFLINE_VERIFICATION
 #endif

@@ -184,7 +184,11 @@ int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib)
  */
 const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib)
 {
+	#ifdef OPTIMIZE_EXPORT_DATA
+	printf("I%d-S%d-T%d-C%d\n",buffer_rtmlib->Identifier_of_Task,buffer_rtmlib->State_of_Task,buffer_rtmlib->TimeStamp,buffer_rtmlib->CounterTask);
+	#else 
 	printf("{\"TaskIdentifier\" : %d,\"TaskState\" : %d,\"TimeStamp\" : %d,\"TaskCounter\" : %d}\n",buffer_rtmlib->Identifier_of_Task,buffer_rtmlib->State_of_Task,buffer_rtmlib->TimeStamp,buffer_rtmlib->CounterTask);
+	#endif
 	return;
 }
 
