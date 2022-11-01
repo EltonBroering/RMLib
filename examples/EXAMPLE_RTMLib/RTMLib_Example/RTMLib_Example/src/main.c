@@ -129,7 +129,16 @@ extern void vApplicationTickHook(void);
 extern void vApplicationMallocFailedHook(void);
 extern void xPortSysTickHandler(void);
 
+#ifdef OFFLINE_VERIFICATION
 TimeStamp_t		QueueTimeStampsBufferDumped;
+#endif
+
+#ifdef ONLINE_VERIFICATION
+TimeStampVeredict_t		QueueTimeStampsBufferDumped;
+uint32_t Identifiers_Tasks[NUMBER_TASKS];
+uint32_t Vector_WCET_Tasks[NUMBER_TASKS];
+uint32_t Vector_Deadline_Tasks[NUMBER_TASKS];
+#endif
 
 pv_type_actuation	controller_ouput;
 pv_msg_input		controller_input;
@@ -137,7 +146,7 @@ pv_msg_input		controller_input;
 /** LED blink time 300ms */
 #define BLINK_PERIOD						10
 
-#define MS_COUNTS_DUMMY						7000
+#define MS_COUNTS_DUMMY						8000
 
 /**
  * \brief Called if stack overflow during execution
@@ -180,7 +189,49 @@ extern void vApplicationMallocFailedHook(void)
 	configASSERT( ( volatile void * ) NULL );
 }
 
-
+#ifdef ONLINE_VERIFICATION
+void init_buffer_tasks_runtime_verification_online()
+{
+	for(uint8_t count_task = 0; count_task < NUMBER_TASKS; count_task++)
+	{
+		switch(count_task)
+		{
+			case TASK_IDENTIFIER_DUMMY_ACTUATION:
+				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_DUMMY_ACTUATION;
+				Vector_WCET_Tasks[count_task]		= TASK_DUMMY_ACTUATION_WORST_CASE;
+				Vector_Deadline_Tasks[count_task]	= TASK_DUMMY_ACTUATION_PERIOD;
+				break;
+			
+			case TASK_IDENTIFIER_DUMMY_SENSING:
+				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_DUMMY_SENSING;
+				Vector_WCET_Tasks[count_task]		= TASK_DUMMY_SENSING_WORST_CASE;
+				Vector_Deadline_Tasks[count_task]	= TASK_DUMMY_SENSING_PERIOD;
+				break;
+			
+			case TASK_IDENTIFIER_CONTROLLER:
+				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_CONTROLLER;
+				Vector_WCET_Tasks[count_task]		= TASK_CONTROLLER_WORST_CASE;
+				Vector_Deadline_Tasks[count_task]	= TASK_CONTROLLER_PERIOD;
+				break;
+				
+			case TASK_IDENTIFIER_BLINK_LED_HLC:
+				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_BLINK_LED_HLC;
+				Vector_WCET_Tasks[count_task]		= TASK_BLINK_LED_HLC_WORST_CASE;
+				Vector_Deadline_Tasks[count_task]	= TASK_BLINK_LED_HLC_PERIOD;
+				break;
+				
+			case TASK_IDENTIFIER_COMMUNICATION:
+				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_COMMUNICATION;
+				Vector_WCET_Tasks[count_task]		= TASK_COMMUNICATION_WORST_CASE;
+				Vector_Deadline_Tasks[count_task]	= TASK_COMMUNICATION_PERIOD;
+				break;
+				
+			default:
+				break;
+		}
+	}
+}
+#endif
 
 /**
  *  \brief Configure LED.
@@ -383,7 +434,13 @@ int main(void)
 	Timer_init();
 	
 	//Start RunTime Verification Lib
+	#ifdef ONLINE_VERIFICATION
+	init_buffer_tasks_runtime_verification_online();
+	rtmlib_init(&Identifiers_Tasks,&Vector_Deadline_Tasks,&Vector_WCET_Tasks);
+	#endif
+	#ifdef OFFLINE_VERIFICATION
 	rtmlib_init();
+	#endif
 
 	/* Output demo information. */
 	printf("-- Freertos Example --\n\r");

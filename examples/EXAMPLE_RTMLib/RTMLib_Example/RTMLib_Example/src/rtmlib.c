@@ -20,10 +20,23 @@ typedef struct CircularBuffer
 }CircularBuffer_t;
 
 CircularBuffer_t	QueueTimeStamps;		//Circular queue with timestamps
+
+
+#ifdef ONLINE_VERIFICATION
+TimeStampVeredict_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
+TimeStampVeredict_t			TimeStampInsert;
+uint16_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
+uint32_t Identifiers_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
+uint32_t Vector_WCET_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
+uint32_t Vector_Deadline_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
+TimeStamp_t TimeStampsBufferProcessing[2][NUMBER_TASKS_RUNTIME_VERIFICATION];
+#endif
+
+#ifdef OFFLINE_VERIFICATION
 TimeStamp_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
 TimeStamp_t			TimeStampInsert;
-
 uint32_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
+#endif
 
 /**
  * \brief Function that initializes the circular queue
@@ -64,8 +77,6 @@ int8_t cb_push_back(CircularBuffer_t *cb, const void *item)
 	{
 		return COMMAND_NOK;
 	}
-	
-	
 	
 	if(cb->head > (cb->buffer_end) || cb->head < cb->buffer)
 	{
@@ -128,14 +139,126 @@ uint16_t cb_size(CircularBuffer_t *cb)
 	return cb->count;
 }
 
+#ifdef ONLINE_VERIFICATION
 /**
- * \brief Function that dumps the system timestamp memory, to export the data for analysis
- */
-void dump_buffer_timestamp()
+ * \brief Init RMLib
+**/
+void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * wcet_service)
 {
-	rtmlib_export_data(&QueueTimeStampsBuffer);
+	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStampVeredict_t));
 	
-	rtmlib_init();
+	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint16_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
+	
+	memcpy(&Identifiers_Tasks,tasks_identifiers,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
+	memcpy(&Vector_WCET_Tasks,wcet_service,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
+	memcpy(&Vector_Deadline_Tasks,deadlines_service,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
+}
+
+/**
+ * \brief Function that saves the task timestamp and make Veredict
+ *
+ * \param TimeStamp - Pointer to Circular Queue structure
+ * \param Identifier_of_Task - Identifier of task
+ * \param task_state - Identifier of task
+ * \return Return status of requested action 
+ *     @retval COMMAND_OK		Indicates that the item was successfully
+ *     @retval COMMAND_NOK		Indicates that the item could not be do
+ *     @retval COMMAND_ERROR	Event error
+ */
+int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
+{
+	uint8_t task_index = 0;
+	
+	for(uint8_t number_task = 0;  number_task < NUMBER_TASKS_RUNTIME_VERIFICATION; number_task++)
+	{
+		if(Identifiers_Tasks[number_task] == task_identifier)
+		{
+			task_index = number_task;
+			break;
+		}
+	}
+	
+	TimeStampsBufferProcessing[task_index][task_state].Identifier_of_Task = task_identifier;
+	TimeStampsBufferProcessing[task_index][task_state].State_of_Task = task_state;
+	TimeStampsBufferProcessing[task_index][task_state].TimeStamp = ReadCounterMiliSeconds();
+	if(task_state == TASK_END_EXECUTION)
+	{
+		counter_tasks_runtime_verification[task_index]++;
+	}
+	TimeStampsBufferProcessing[task_index][task_state].CounterTask = counter_tasks_runtime_verification[task_index];
+	
+	if(task_state == TASK_END_EXECUTION)
+	{
+		TimeStampInsert.TimeStamp		= TimeStampsBufferProcessing[task_index][TASK_INIT_EXECUTION].TimeStamp;
+		TimeStampInsert.WCET_TIME		= (TimeStampsBufferProcessing[task_index][TASK_END_EXECUTION].TimeStamp - TimeStampsBufferProcessing[task_index][TASK_INIT_EXECUTION].TimeStamp);
+		TimeStampInsert.CounterTask		=  TimeStampsBufferProcessing[task_index][TASK_END_EXECUTION].CounterTask;
+		TimeStampInsert.Identifier_of_Task = Identifiers_Tasks[task_index];
+		
+		if(TimeStampInsert.WCET_TIME <= Vector_WCET_Tasks[task_index])
+		{
+			TimeStampInsert.Status_of_WCET_Task = true;
+		}
+		else
+		{
+			TimeStampInsert.Status_of_WCET_Task = false;
+		}
+		
+		if((TimeStampInsert.WCET_TIME + TimeStampInsert.TimeStamp) <= (Vector_Deadline_Tasks[task_index] * TimeStampInsert.CounterTask))
+		{
+			TimeStampInsert.Status_of_DeadLine_Task = true;
+		}
+		else
+		{
+			TimeStampInsert.Status_of_DeadLine_Task = false;
+		}
+		return cb_push_back(&QueueTimeStamps,&TimeStampInsert);
+	}
+	else
+	{
+		return COMMAND_OK;
+	}
+	
+}
+
+/**
+ * \brief Function to export TimeStamp, copying data to buffer in reference
+ * \param buffer_rtmlib - Pointer to TimeStamp structure
+ * \return Return status of requested action 
+ *     @retval COMMAND_OK		Indicates that the item was successfully
+ *     @retval COMMAND_NOK		Indicates that the item could not be do
+ *     @retval COMMAND_ERROR	Event error
+ */
+int8_t rtmlib_export_data(TimeStampVeredict_t * buffer_rtmlib)
+{
+	return cb_pop_front(&QueueTimeStamps,buffer_rtmlib);
+}
+
+/**
+ * \brief Function to export TimeStamp, in String format used  to offline verification
+ * \param buffer_rtmlib - Pointer to TimeStamp structure
+ * \return String of TimeStamp structure in offline verirication format
+ */
+const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib)
+{
+	#ifdef OPTIMIZE_EXPORT_DATA
+	printf("IT%d-TS%d-WC%d-CT%d-SW%d-SD%d\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->WCET_TIME, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
+	#else 
+	printf("{\"TaskIdentifier\" : %d,\"TimeStamp\" : %d,\"WCET\" : %d,\"CounterTask\" : %d,\"Status WCET\" : %d,\"Status Deadline\" : %d}\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->WCET_TIME, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
+	#endif
+	return;
+}
+#endif
+
+
+#ifdef OFFLINE_VERIFICATION
+/**
+ * \brief Init RMLib
+**/
+void rtmlib_init()
+{
+	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStamp_t));
+	
+	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint32_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
 }
 
 /**
@@ -159,8 +282,7 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 		counter_tasks_runtime_verification[task_identifier-1]++;
 	}
 	TimeStampInsert.CounterTask = counter_tasks_runtime_verification[task_identifier-1];
-	int8_t return_function = cb_push_back(&QueueTimeStamps,&TimeStampInsert);
-	return return_function;
+	return cb_push_back(&QueueTimeStamps,&TimeStampInsert);
 }
 
 /**
@@ -173,8 +295,7 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
  */
 int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib)
 {
-	int8_t return_function = cb_pop_front(&QueueTimeStamps,buffer_rtmlib);
-	return return_function;
+	return cb_pop_front(&QueueTimeStamps,buffer_rtmlib);
 }
 
 /**
@@ -191,13 +312,4 @@ const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib)
 	#endif
 	return;
 }
-
-/**
- * \brief Init RMLib
-**/
-void rtmlib_init()
-{
-	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStamp_t));
-	
-	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint32_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
-}
+#endif

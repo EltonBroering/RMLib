@@ -11,7 +11,7 @@
 #include "Includes.h"
 
 
-#define SIZE_RUN_TIME_BUFFER_QUEUE		10000
+#define SIZE_RUN_TIME_BUFFER_QUEUE		1000
 
 #define NUMBER_TASKS_RUNTIME_VERIFICATION	5
 
@@ -23,12 +23,26 @@
 #define TASK_INIT_EXECUTION				0
 #define TASK_END_EXECUTION				1
 
-//#define				ONLINE_VERIFICATION
+#define				ONLINE_VERIFICATION
 
 #define				OPTIMIZE_EXPORT_DATA
 
 #ifndef ONLINE_VERIFICATION
 #define				OFFLINE_VERIFICATION
+#endif
+
+#ifdef ONLINE_VERIFICATION
+//TimeStamp Veredict of system RunTime Verification
+typedef struct PACKED
+{
+	uint16_t		TimeStamp;
+	uint16_t		CounterTask;
+	uint16_t		WCET_TIME;
+	uint8_t			Identifier_of_Task : 5;
+	uint8_t			Status_of_WCET_Task : 2;
+	uint8_t			Status_of_DeadLine_Task : 2;
+	uint8_t			ReservedBits : 7;
+} TimeStampVeredict_t;
 #endif
 
 // TimeStamp of system RunTime Verification
@@ -40,6 +54,7 @@ typedef struct PACKED
 	uint8_t			State_of_Task : 2;
 } TimeStamp_t;
 
+
 int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state);
 
 /**
@@ -48,17 +63,20 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state);
   */
 extern uint32_t ReadCounterMiliSeconds(void);
 
+#ifdef ONLINE_VERIFICATION
+void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * wcet_service);
+
+int8_t rtmlib_export_data(TimeStampVeredict_t * buffer_rtmlib);
+
+const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib);
+#endif
+
 #ifdef OFFLINE_VERIFICATION
-// Init RMLib
 void rtmlib_init();
 
 int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib);
 
 const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib);
 #endif
-
-#ifdef ONLINE_VERIFICATION
-#endif
-
 
 #endif /* RTMLIB_H_ */
