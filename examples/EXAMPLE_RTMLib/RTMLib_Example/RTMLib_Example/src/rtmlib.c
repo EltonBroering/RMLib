@@ -29,7 +29,7 @@ uint16_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Identifiers_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Vector_WCET_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Vector_Deadline_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
-TimeStamp_t TimeStampsBufferProcessing[2][NUMBER_TASKS_RUNTIME_VERIFICATION];
+TimeStamp_t TimeStampsBufferProcessing[NUMBER_TASKS_RUNTIME_VERIFICATION][2];
 #endif
 
 #ifdef OFFLINE_VERIFICATION

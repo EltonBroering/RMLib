@@ -194,7 +194,7 @@ void init_buffer_tasks_runtime_verification_online()
 {
 	for(uint8_t count_task = 0; count_task < NUMBER_TASKS; count_task++)
 	{
-		switch(count_task)
+		switch(count_task+1)
 		{
 			case TASK_IDENTIFIER_DUMMY_ACTUATION:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_DUMMY_ACTUATION;
