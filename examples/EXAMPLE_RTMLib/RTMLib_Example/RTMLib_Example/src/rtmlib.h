@@ -25,19 +25,24 @@
 
 #define				ONLINE_VERIFICATION
 
-#define				OPTIMIZE_EXPORT_DATA
+// Use this define to improve the optimization of data export
+//#define				OPTIMIZE_EXPORT_DATA
 
 #ifndef ONLINE_VERIFICATION
 #define				OFFLINE_VERIFICATION
 #endif
 
 #ifdef ONLINE_VERIFICATION
+
+// Use this define to export only in cases of erros of Real Time
+#define EXPORT_ONLY_RTOS_ERRORS
+
 //TimeStamp Veredict of system RunTime Verification
 typedef struct PACKED
 {
 	uint16_t		TimeStamp;
 	uint16_t		CounterTask;
-	uint16_t		WCET_TIME;
+	uint16_t		ExecutionTime;
 	uint8_t			Identifier_of_Task : 5;
 	uint8_t			Status_of_WCET_Task : 2;
 	uint8_t			Status_of_DeadLine_Task : 2;

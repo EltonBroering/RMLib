@@ -190,11 +190,11 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 	if(task_state == TASK_END_EXECUTION)
 	{
 		TimeStampInsert.TimeStamp		= TimeStampsBufferProcessing[task_index][TASK_INIT_EXECUTION].TimeStamp;
-		TimeStampInsert.WCET_TIME		= (TimeStampsBufferProcessing[task_index][TASK_END_EXECUTION].TimeStamp - TimeStampsBufferProcessing[task_index][TASK_INIT_EXECUTION].TimeStamp);
+		TimeStampInsert.ExecutionTime		= (TimeStampsBufferProcessing[task_index][TASK_END_EXECUTION].TimeStamp - TimeStampsBufferProcessing[task_index][TASK_INIT_EXECUTION].TimeStamp);
 		TimeStampInsert.CounterTask		=  TimeStampsBufferProcessing[task_index][TASK_END_EXECUTION].CounterTask;
 		TimeStampInsert.Identifier_of_Task = Identifiers_Tasks[task_index];
 		
-		if(TimeStampInsert.WCET_TIME <= Vector_WCET_Tasks[task_index])
+		if(TimeStampInsert.ExecutionTime <= Vector_WCET_Tasks[task_index])
 		{
 			TimeStampInsert.Status_of_WCET_Task = true;
 		}
@@ -203,7 +203,7 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 			TimeStampInsert.Status_of_WCET_Task = false;
 		}
 		
-		if((TimeStampInsert.WCET_TIME + TimeStampInsert.TimeStamp) <= (Vector_Deadline_Tasks[task_index] * TimeStampInsert.CounterTask))
+		if((TimeStampInsert.ExecutionTime + TimeStampInsert.TimeStamp) <= (Vector_Deadline_Tasks[task_index] * TimeStampInsert.CounterTask))
 		{
 			TimeStampInsert.Status_of_DeadLine_Task = true;
 		}
@@ -211,7 +211,18 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 		{
 			TimeStampInsert.Status_of_DeadLine_Task = false;
 		}
+		#ifdef EXPORT_ONLY_RTOS_ERRORS
+		if(!TimeStampInsert.Status_of_DeadLine_Task || !TimeStampInsert.Status_of_WCET_Task)
+		{
+			return cb_push_back(&QueueTimeStamps,&TimeStampInsert);
+		}
+		else
+		{
+			return COMMAND_OK;
+		}
+		#else
 		return cb_push_back(&QueueTimeStamps,&TimeStampInsert);
+		#endif
 	}
 	else
 	{
@@ -241,9 +252,9 @@ int8_t rtmlib_export_data(TimeStampVeredict_t * buffer_rtmlib)
 const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib)
 {
 	#ifdef OPTIMIZE_EXPORT_DATA
-	printf("IT%d-TS%d-WC%d-CT%d-SW%d-SD%d\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->WCET_TIME, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
+	printf("IT%d-TS%d-ET%d-CT%d-SW%d-SD%d\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->ExecutionTime, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
 	#else 
-	printf("{\"TaskIdentifier\" : %d,\"TimeStamp\" : %d,\"WCET\" : %d,\"CounterTask\" : %d,\"Status WCET\" : %d,\"Status Deadline\" : %d}\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->WCET_TIME, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
+	printf("{\"TaskIdentifier\":%d,\"TimeStamp\":%d,\"ExecutionTime\":%d,\"CounterTask\":%d,\"Status WCET\":%d,\"Status Deadline\":%d}\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->ExecutionTime, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
 	#endif
 	return;
 }
