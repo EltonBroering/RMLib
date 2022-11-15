@@ -29,12 +29,12 @@ uint16_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Identifiers_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Vector_WCET_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Vector_Deadline_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
-TimeStamp_t TimeStampsBufferProcessing[NUMBER_TASKS_RUNTIME_VERIFICATION][2];
+EventTimeStamp_t TimeStampsBufferProcessing[NUMBER_TASKS_RUNTIME_VERIFICATION][2];
 #endif
 
 #ifdef OFFLINE_VERIFICATION
-TimeStamp_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
-TimeStamp_t			TimeStampInsert;
+EventTimeStamp_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
+EventTimeStamp_t			TimeStampInsert;
 uint32_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
 #endif
 
@@ -267,7 +267,7 @@ const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib)
 **/
 void rtmlib_init()
 {
-	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStamp_t));
+	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(EventTimeStamp_t));
 	
 	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint32_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
 }
@@ -304,7 +304,7 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
  *     @retval COMMAND_NOK		Indicates that the item could not be do
  *     @retval COMMAND_ERROR	Event error
  */
-int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib)
+int8_t rtmlib_export_data(EventTimeStamp_t * buffer_rtmlib)
 {
 	return cb_pop_front(&QueueTimeStamps,buffer_rtmlib);
 }
@@ -314,7 +314,7 @@ int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib)
  * \param buffer_rtmlib - Pointer to TimeStamp structure
  * \return String of TimeStamp structure in offline verirication format
  */
-const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib)
+const char rtmlib_export_data_string(EventTimeStamp_t * buffer_rtmlib)
 {
 	#ifdef OPTIMIZE_EXPORT_DATA
 	printf("I%d-S%d-T%d-C%d\n",buffer_rtmlib->Identifier_of_Task,buffer_rtmlib->State_of_Task,buffer_rtmlib->TimeStamp,buffer_rtmlib->CounterTask);

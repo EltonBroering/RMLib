@@ -130,7 +130,7 @@ extern void vApplicationMallocFailedHook(void);
 extern void xPortSysTickHandler(void);
 
 #ifdef OFFLINE_VERIFICATION
-TimeStamp_t		QueueTimeStampsBufferDumped;
+EventTimeStamp_t		QueueTimeStampsBufferDumped;
 #endif
 
 #ifdef ONLINE_VERIFICATION

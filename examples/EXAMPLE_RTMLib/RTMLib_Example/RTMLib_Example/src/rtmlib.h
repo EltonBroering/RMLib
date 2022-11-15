@@ -34,8 +34,10 @@
 
 #ifdef ONLINE_VERIFICATION
 
-// Use this define to export only in cases of erros of Real Time
-#define EXPORT_ONLY_RTOS_ERRORS
+// Use this define to export only in cases of violating temporal restrictions
+//#define EXPORT_ONLY_RTOS_ERRORS
+
+//#define EXPORT_DUMP_REGISTERS
 
 //TimeStamp Veredict of system RunTime Verification
 typedef struct PACKED
@@ -50,14 +52,14 @@ typedef struct PACKED
 } TimeStampVeredict_t;
 #endif
 
-// TimeStamp of system RunTime Verification
+//EventTimeStamp of system RunTime Verification
 typedef struct PACKED
 {
 	uint32_t		TimeStamp;
 	uint32_t		CounterTask : 25;
 	uint8_t			Identifier_of_Task : 5;
 	uint8_t			State_of_Task : 2;
-} TimeStamp_t;
+} EventTimeStamp_t;
 
 
 int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state);
@@ -79,9 +81,9 @@ const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib);
 #ifdef OFFLINE_VERIFICATION
 void rtmlib_init();
 
-int8_t rtmlib_export_data(TimeStamp_t * buffer_rtmlib);
+int8_t rtmlib_export_data(EventTimeStamp_t * buffer_rtmlib);
 
-const char rtmlib_export_data_string(TimeStamp_t * buffer_rtmlib);
+const char rtmlib_export_data_string(EventTimeStamp_t * buffer_rtmlib);
 #endif
 
 #endif /* RTMLIB_H_ */
