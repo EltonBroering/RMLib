@@ -138,6 +138,12 @@ TimeStampVeredict_t		QueueTimeStampsBufferDumped;
 uint32_t Identifiers_Tasks[NUMBER_TASKS];
 uint32_t Vector_WCET_Tasks[NUMBER_TASKS];
 uint32_t Vector_Deadline_Tasks[NUMBER_TASKS];
+
+#ifdef EXPORT_DUMP_REGISTERS
+#define size_buffer_export 256
+char szList[size_buffer_export];
+char str_export_aux[size_buffer_export];
+#endif
 #endif
 
 pv_type_actuation	controller_ouput;
@@ -146,7 +152,7 @@ pv_msg_input		controller_input;
 /** LED blink time 300ms */
 #define BLINK_PERIOD						10
 
-#define MS_COUNTS_DUMMY						8000
+#define MS_COUNTS_DUMMY						6000
 
 /**
  * \brief Called if stack overflow during execution
@@ -241,6 +247,13 @@ static void configure_led(void)
 	/* Configure PIOs for LED. */
 	pio_configure(LED_PIO, LED_TYPE, LED_MASK, LED_ATTR);
 }
+
+#ifdef EXPORT_DUMP_REGISTERS
+void DumpStatusRegisters()
+{
+	vTaskList(szList);
+}
+#endif
 
 /**
  * \brief Task Controller
@@ -406,7 +419,17 @@ static void task_communication(void *pvParameters)
 		{
 			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
 		}
-
+		
+		#ifdef EXPORT_DUMP_REGISTERS
+		char * token = strtok(szList, "\n");
+		while(token != NULL)
+		{
+			printf("%s\n", token); //printing each token
+			token = strtok(NULL, "\n");
+		}
+		memset(&szList[0],0,size_buffer_export);
+		#endif
+		
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_END_EXECUTION);
 		counter_tasks_runtime[TASK_IDENTIFIER_COMMUNICATION-1]++;
 		vTaskDelay(10);

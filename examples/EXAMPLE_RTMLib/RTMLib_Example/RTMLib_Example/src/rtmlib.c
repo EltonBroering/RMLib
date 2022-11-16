@@ -214,6 +214,9 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 		#ifdef EXPORT_ONLY_RTOS_ERRORS
 		if(!TimeStampInsert.Status_of_DeadLine_Task || !TimeStampInsert.Status_of_WCET_Task)
 		{
+			#ifdef EXPORT_DUMP_REGISTERS
+			DumpStatusRegisters();
+			#endif
 			return cb_push_back(&QueueTimeStamps,&TimeStampInsert);
 		}
 		else

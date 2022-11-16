@@ -35,9 +35,11 @@
 #ifdef ONLINE_VERIFICATION
 
 // Use this define to export only in cases of violating temporal restrictions
-//#define EXPORT_ONLY_RTOS_ERRORS
+#define EXPORT_ONLY_RTOS_ERRORS
 
-//#define EXPORT_DUMP_REGISTERS
+#ifdef EXPORT_ONLY_RTOS_ERRORS
+#define EXPORT_DUMP_REGISTERS
+#endif
 
 //TimeStamp Veredict of system RunTime Verification
 typedef struct PACKED
@@ -76,6 +78,11 @@ void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint3
 int8_t rtmlib_export_data(TimeStampVeredict_t * buffer_rtmlib);
 
 const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib);
+
+#ifdef EXPORT_DUMP_REGISTERS
+extern void DumpStatusRegisters(void);
+#endif
+
 #endif
 
 #ifdef OFFLINE_VERIFICATION
