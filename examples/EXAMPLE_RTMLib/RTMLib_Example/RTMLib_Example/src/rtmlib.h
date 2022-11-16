@@ -35,10 +35,10 @@
 #ifdef ONLINE_VERIFICATION
 
 // Use this define to export only in cases of violating temporal restrictions
-#define EXPORT_ONLY_RTOS_ERRORS
+//#define EXPORT_ONLY_RTOS_ERRORS
 
 #ifdef EXPORT_ONLY_RTOS_ERRORS
-#define EXPORT_DUMP_REGISTERS
+#define EXPORT_DUMP_STATUS_TASKS
 #endif
 
 //TimeStamp Veredict of system RunTime Verification
@@ -79,8 +79,8 @@ int8_t rtmlib_export_data(TimeStampVeredict_t * buffer_rtmlib);
 
 const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib);
 
-#ifdef EXPORT_DUMP_REGISTERS
-extern void DumpStatusRegisters(void);
+#ifdef EXPORT_DUMP_STATUS_TASKS
+extern void DumpStatusTasks(void);
 #endif
 
 #endif

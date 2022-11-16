@@ -139,7 +139,7 @@ uint32_t Identifiers_Tasks[NUMBER_TASKS];
 uint32_t Vector_WCET_Tasks[NUMBER_TASKS];
 uint32_t Vector_Deadline_Tasks[NUMBER_TASKS];
 
-#ifdef EXPORT_DUMP_REGISTERS
+#ifdef EXPORT_DUMP_STATUS_TASKS
 #define size_buffer_export 256
 char szList[size_buffer_export];
 char str_export_aux[size_buffer_export];
@@ -248,8 +248,11 @@ static void configure_led(void)
 	pio_configure(LED_PIO, LED_TYPE, LED_MASK, LED_ATTR);
 }
 
-#ifdef EXPORT_DUMP_REGISTERS
-void DumpStatusRegisters()
+#ifdef EXPORT_DUMP_STATUS_TASKS
+/*
+	Task used to dump status tasks - For Reference for format export see https://www.freertos.org/a00021.html#vTaskList
+*/
+void DumpStatusTasks()
 {
 	vTaskList(szList);
 }
@@ -420,7 +423,7 @@ static void task_communication(void *pvParameters)
 			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
 		}
 		
-		#ifdef EXPORT_DUMP_REGISTERS
+		#ifdef EXPORT_DUMP_STATUS_TASKS
 		char * token = strtok(szList, "\n");
 		while(token != NULL)
 		{
