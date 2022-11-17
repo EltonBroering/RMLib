@@ -87,15 +87,15 @@
 #include "Includes.h"
 
 #define TASK_COMMUNICATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_COMMUNICATION_STACK_PRIORITY		(tskIDLE_PRIORITY+1)
-#define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
-#define TASK_CONTROLLER_STACK_PRIORITY			(tskIDLE_PRIORITY+2)
+#define TASK_COMMUNICATION_PRIORITY				(tskIDLE_PRIORITY+1)
 #define TASK_LED_HLC_STACK_SIZE					(configMINIMAL_STACK_SIZE)
-#define TASK_LED_HLC_STACK_PRIORITY				(tskIDLE_PRIORITY+3)
+#define TASK_LED_HLC_PRIORITY					(tskIDLE_PRIORITY+2)
+#define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
+#define TASK_CONTROLLER_PRIORITY				(tskIDLE_PRIORITY+3)
 #define TASK_DUMMY_SENSING_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_DUMMY_SENSING_STACK_PRIORITY		(tskIDLE_PRIORITY+4)
+#define TASK_DUMMY_SENSING_PRIORITY				(tskIDLE_PRIORITY+4)
 #define TASK_DUMMY_ACTUATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_DUMMY_ACTUATION_STACK_PRIORITY		(tskIDLE_PRIORITY+5)
+#define TASK_DUMMY_ACTUATION_PRIORITY			(tskIDLE_PRIORITY+5)
 
 
 #define TASK_IDENTIFIER_DUMMY_ACTUATION			1
@@ -473,34 +473,34 @@ int main(void)
 	printf("-- %s\n\r", BOARD_NAME);
 	printf("-- Compiled: %s %s --\n\r", __DATE__, __TIME__);
 	
-
-	/* Create task to controller */
-	if (xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL,
-			TASK_CONTROLLER_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create Controller task\r\n");
-	}
 	
 	/* Create task communication */
-	if (xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL,
-	TASK_COMMUNICATION_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL, TASK_COMMUNICATION_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create coomunication task\r\n");
+	}
+	
+	/* Create task to controller */
+	if(xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL, TASK_CONTROLLER_PRIORITY, NULL) != pdPASS)
+	{
+		printf("Failed to create Controller task\r\n");
 	}
 
 	/* Create task to make led blink */
-	if (xTaskCreate(task_led_hlc, "Led", TASK_LED_HLC_STACK_SIZE, NULL,
-			TASK_LED_HLC_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_led_hlc, "Led", TASK_LED_HLC_STACK_SIZE, NULL, TASK_LED_HLC_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create led task\r\n");
 	}
 	
 	/* Create task to make Dummy Sensing */
-	if (xTaskCreate(task_dummy_sensing, "Dummy Sensing", TASK_DUMMY_SENSING_STACK_SIZE, NULL,
-	TASK_DUMMY_SENSING_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_dummy_sensing, "Dummy Sensing", TASK_DUMMY_SENSING_STACK_SIZE, NULL, TASK_DUMMY_SENSING_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create dummy task\r\n");
 	}
 	
 	/* Create task to make Dummy Actuation */
-	if (xTaskCreate(task_dummy_actuation, "Dummy Actuation", TASK_DUMMY_ACTUATION_STACK_SIZE, NULL,
-	TASK_DUMMY_ACTUATION_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_dummy_actuation, "Dummy Actuation", TASK_DUMMY_ACTUATION_STACK_SIZE, NULL,TASK_DUMMY_ACTUATION_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create dummy task\r\n");
 	}
 	
