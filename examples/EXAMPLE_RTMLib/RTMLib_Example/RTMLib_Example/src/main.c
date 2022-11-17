@@ -154,6 +154,8 @@ pv_msg_input		controller_input;
 
 #define MS_COUNTS_DUMMY						6000
 
+#define MS_INIT_USB_MILISECOND							500
+
 /**
  * \brief Called if stack overflow during execution
  */
@@ -265,7 +267,7 @@ static void task_controller(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
-	c_control_lqrArthur_init();
+	//c_control_lqrArthur_init();
 	
 	while(true)
 	{
@@ -417,7 +419,13 @@ static void task_communication(void *pvParameters)
 	
 	while(true)
 	{
+		if(ReadCounterMiliSeconds() < MS_INIT_USB_MILISECOND)
+		{
+			continue;
+		}
+		
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_INIT_EXECUTION);
+		
 		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
 		{
 			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
@@ -473,17 +481,16 @@ int main(void)
 	printf("-- %s\n\r", BOARD_NAME);
 	printf("-- Compiled: %s %s --\n\r", __DATE__, __TIME__);
 	
-	
-	/* Create task communication */
-	if(xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL, TASK_COMMUNICATION_PRIORITY, NULL) != pdPASS)
-	{
-		printf("Failed to create coomunication task\r\n");
-	}
-	
 	/* Create task to controller */
 	if(xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL, TASK_CONTROLLER_PRIORITY, NULL) != pdPASS)
 	{
 		printf("Failed to create Controller task\r\n");
+	}
+
+	/* Create task communication */
+	if(xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL, TASK_COMMUNICATION_PRIORITY, NULL) != pdPASS)
+	{
+		printf("Failed to create coomunication task\r\n");
 	}
 
 	/* Create task to make led blink */

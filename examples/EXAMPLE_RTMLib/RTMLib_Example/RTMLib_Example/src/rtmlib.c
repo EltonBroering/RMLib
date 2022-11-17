@@ -257,7 +257,7 @@ const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib)
 	#ifdef OPTIMIZE_EXPORT_DATA
 	printf("IT%d-TS%d-ET%d-CT%d-SW%d-SD%d\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->ExecutionTime, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
 	#else 
-	printf("{\"TaskIdentifier\":%d,\"TimeStamp\":%d,\"ExecutionTime\":%d,\"CounterTask\":%d,\"Status WCET\":%d,\"Status Deadline\":%d}\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->ExecutionTime, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
+	printf("{\"TaskIdentifier\":%d,\"TimeStamp\":%d,\"ExecutionTime\":%d,\"CounterTask\":%d,\"StatusWCET\":%d,\"StatusDeadline\":%d}\n", buffer_rtmlib->Identifier_of_Task, buffer_rtmlib->TimeStamp, buffer_rtmlib->ExecutionTime, buffer_rtmlib->CounterTask, buffer_rtmlib->Status_of_WCET_Task, buffer_rtmlib->Status_of_DeadLine_Task);
 	#endif
 	return;
 }
