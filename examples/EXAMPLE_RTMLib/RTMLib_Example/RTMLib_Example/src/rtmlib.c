@@ -23,7 +23,7 @@ CircularBuffer_t	QueueTimeStamps;		//Circular queue with timestamps
 
 
 #ifdef ONLINE_VERIFICATION
-TimeStampVeredict_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
+TimeStampVeredict_t			QueueTimeStampVerdictsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
 TimeStampVeredict_t			TimeStampInsert;
 uint16_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Identifiers_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
@@ -33,7 +33,7 @@ EventTimeStamp_t TimeStampsBufferProcessing[NUMBER_TASKS_RUNTIME_VERIFICATION][2
 #endif
 
 #ifdef OFFLINE_VERIFICATION
-EventTimeStamp_t			QueueTimeStampsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
+EventTimeStamp_t			QueueEventsBuffer[SIZE_RUN_TIME_BUFFER_QUEUE];
 EventTimeStamp_t			TimeStampInsert;
 uint32_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
 #endif
@@ -145,7 +145,7 @@ uint16_t cb_size(CircularBuffer_t *cb)
 **/
 void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * wcet_service)
 {
-	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStampVeredict_t));
+	cb_init(&QueueTimeStamps,&QueueTimeStampVerdictsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStampVeredict_t));
 	
 	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint16_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
 	
@@ -270,7 +270,7 @@ const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib)
 **/
 void rtmlib_init()
 {
-	cb_init(&QueueTimeStamps,&QueueTimeStampsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(EventTimeStamp_t));
+	cb_init(&QueueTimeStamps,&QueueEventsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(EventTimeStamp_t));
 	
 	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint32_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
 }
