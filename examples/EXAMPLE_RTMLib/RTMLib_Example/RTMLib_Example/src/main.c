@@ -154,7 +154,7 @@ pv_msg_input		controller_input;
 
 #define MS_COUNTS_DUMMY						6000
 
-#define MS_INIT_USB_MILISECOND							500
+#define MS_INIT_USB_MILISECOND				500
 
 /**
  * \brief Called if stack overflow during execution
