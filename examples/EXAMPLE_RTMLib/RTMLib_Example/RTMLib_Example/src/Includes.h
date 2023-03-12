@@ -12,8 +12,6 @@
 #include <asf.h>
 #include <string.h>
 
-#define PACKED SHORTENUM		// Utilizado nas struct para formatar os dados de 8 em 8 bits (usado em tempo de compilação - compiler.h)
-
 
 #include "arm_math.h"
 
