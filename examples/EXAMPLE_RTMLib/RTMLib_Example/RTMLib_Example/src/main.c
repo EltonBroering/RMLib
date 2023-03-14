@@ -138,12 +138,19 @@ TimeStampVeredict_t		QueueTimeStampsBufferDumped;
 uint32_t Identifiers_Tasks[NUMBER_TASKS];
 uint32_t Vector_WCET_Tasks[NUMBER_TASKS];
 uint32_t Vector_Deadline_Tasks[NUMBER_TASKS];
+uint32_t Vector_Period_Tasks[NUMBER_TASKS];
 
 #ifdef EXPORT_DUMP_STATUS_TASKS
 #define size_buffer_export 256
 char szList[size_buffer_export];
 char str_export_aux[size_buffer_export];
 #endif
+#endif
+
+#define ASSYNCRONOUS_TASK
+
+#ifdef ASSYNCRONOUS_TASK
+
 #endif
 
 pv_type_actuation	controller_ouput;
@@ -208,30 +215,35 @@ void init_buffer_tasks_runtime_verification_online()
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_DUMMY_ACTUATION;
 				Vector_WCET_Tasks[count_task]		= TASK_DUMMY_ACTUATION_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_DUMMY_ACTUATION_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_DUMMY_ACTUATION_PERIOD;
 				break;
 			
 			case TASK_IDENTIFIER_DUMMY_SENSING:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_DUMMY_SENSING;
 				Vector_WCET_Tasks[count_task]		= TASK_DUMMY_SENSING_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_DUMMY_SENSING_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_DUMMY_SENSING_PERIOD;
 				break;
 			
 			case TASK_IDENTIFIER_CONTROLLER:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_CONTROLLER;
 				Vector_WCET_Tasks[count_task]		= TASK_CONTROLLER_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_CONTROLLER_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_CONTROLLER_PERIOD;
 				break;
 				
 			case TASK_IDENTIFIER_BLINK_LED_HLC:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_BLINK_LED_HLC;
 				Vector_WCET_Tasks[count_task]		= TASK_BLINK_LED_HLC_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_BLINK_LED_HLC_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_BLINK_LED_HLC_PERIOD;
 				break;
 				
 			case TASK_IDENTIFIER_COMMUNICATION:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_COMMUNICATION;
 				Vector_WCET_Tasks[count_task]		= TASK_COMMUNICATION_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_COMMUNICATION_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_COMMUNICATION_PERIOD;
 				break;
 				
 			default:
@@ -470,7 +482,7 @@ int main(void)
 	//Start RunTime Verification Lib
 	#ifdef ONLINE_VERIFICATION
 	init_buffer_tasks_runtime_verification_online();
-	rtmlib_init(&Identifiers_Tasks,&Vector_Deadline_Tasks,&Vector_WCET_Tasks);
+	rtmlib_init(&Identifiers_Tasks,&Vector_Deadline_Tasks,&Vector_Period_Tasks,&Vector_WCET_Tasks);
 	#endif
 	#ifdef OFFLINE_VERIFICATION
 	rtmlib_init();

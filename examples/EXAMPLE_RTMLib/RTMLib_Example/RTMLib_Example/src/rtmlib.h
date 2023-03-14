@@ -80,7 +80,7 @@ extern int printf(const char * restrict format, ... );
 
 
 #ifdef ONLINE_VERIFICATION
-void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * wcet_service);
+void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * period_service,uint32_t * wcet_service);
 
 int8_t rtmlib_export_data(TimeStampVeredict_t * buffer_rtmlib);
 
