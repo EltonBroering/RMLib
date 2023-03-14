@@ -87,15 +87,15 @@
 #include "Includes.h"
 
 #define TASK_COMMUNICATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_COMMUNICATION_STACK_PRIORITY		(tskIDLE_PRIORITY+1)
-#define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
-#define TASK_CONTROLLER_STACK_PRIORITY			(tskIDLE_PRIORITY+2)
+#define TASK_COMMUNICATION_PRIORITY				(tskIDLE_PRIORITY+1)
 #define TASK_LED_HLC_STACK_SIZE					(configMINIMAL_STACK_SIZE)
-#define TASK_LED_HLC_STACK_PRIORITY				(tskIDLE_PRIORITY+3)
+#define TASK_LED_HLC_PRIORITY					(tskIDLE_PRIORITY+2)
+#define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
+#define TASK_CONTROLLER_PRIORITY				(tskIDLE_PRIORITY+3)
 #define TASK_DUMMY_SENSING_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_DUMMY_SENSING_STACK_PRIORITY		(tskIDLE_PRIORITY+4)
+#define TASK_DUMMY_SENSING_PRIORITY				(tskIDLE_PRIORITY+4)
 #define TASK_DUMMY_ACTUATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_DUMMY_ACTUATION_STACK_PRIORITY		(tskIDLE_PRIORITY+5)
+#define TASK_DUMMY_ACTUATION_PRIORITY			(tskIDLE_PRIORITY+5)
 
 
 #define TASK_IDENTIFIER_DUMMY_ACTUATION			1
@@ -130,7 +130,7 @@ extern void vApplicationMallocFailedHook(void);
 extern void xPortSysTickHandler(void);
 
 #ifdef OFFLINE_VERIFICATION
-TimeStamp_t		QueueTimeStampsBufferDumped;
+EventTimeStamp_t		QueueTimeStampsBufferDumped;
 #endif
 
 #ifdef ONLINE_VERIFICATION
@@ -138,6 +138,19 @@ TimeStampVeredict_t		QueueTimeStampsBufferDumped;
 uint32_t Identifiers_Tasks[NUMBER_TASKS];
 uint32_t Vector_WCET_Tasks[NUMBER_TASKS];
 uint32_t Vector_Deadline_Tasks[NUMBER_TASKS];
+uint32_t Vector_Period_Tasks[NUMBER_TASKS];
+
+#ifdef EXPORT_DUMP_STATUS_TASKS
+#define size_buffer_export 256
+char szList[size_buffer_export];
+char str_export_aux[size_buffer_export];
+#endif
+#endif
+
+#define ASSYNCRONOUS_TASK
+
+#ifdef ASSYNCRONOUS_TASK
+
 #endif
 
 pv_type_actuation	controller_ouput;
@@ -146,7 +159,9 @@ pv_msg_input		controller_input;
 /** LED blink time 300ms */
 #define BLINK_PERIOD						10
 
-#define MS_COUNTS_DUMMY						8000
+#define MS_COUNTS_DUMMY						6000
+
+#define MS_INIT_USB_MILISECOND				500
 
 /**
  * \brief Called if stack overflow during execution
@@ -200,30 +215,35 @@ void init_buffer_tasks_runtime_verification_online()
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_DUMMY_ACTUATION;
 				Vector_WCET_Tasks[count_task]		= TASK_DUMMY_ACTUATION_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_DUMMY_ACTUATION_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_DUMMY_ACTUATION_PERIOD;
 				break;
 			
 			case TASK_IDENTIFIER_DUMMY_SENSING:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_DUMMY_SENSING;
 				Vector_WCET_Tasks[count_task]		= TASK_DUMMY_SENSING_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_DUMMY_SENSING_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_DUMMY_SENSING_PERIOD;
 				break;
 			
 			case TASK_IDENTIFIER_CONTROLLER:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_CONTROLLER;
 				Vector_WCET_Tasks[count_task]		= TASK_CONTROLLER_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_CONTROLLER_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_CONTROLLER_PERIOD;
 				break;
 				
 			case TASK_IDENTIFIER_BLINK_LED_HLC:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_BLINK_LED_HLC;
 				Vector_WCET_Tasks[count_task]		= TASK_BLINK_LED_HLC_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_BLINK_LED_HLC_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_BLINK_LED_HLC_PERIOD;
 				break;
 				
 			case TASK_IDENTIFIER_COMMUNICATION:
 				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_COMMUNICATION;
 				Vector_WCET_Tasks[count_task]		= TASK_COMMUNICATION_WORST_CASE;
 				Vector_Deadline_Tasks[count_task]	= TASK_COMMUNICATION_PERIOD;
+				Vector_Period_Tasks[count_task]		= TASK_COMMUNICATION_PERIOD;
 				break;
 				
 			default:
@@ -242,6 +262,16 @@ static void configure_led(void)
 	pio_configure(LED_PIO, LED_TYPE, LED_MASK, LED_ATTR);
 }
 
+#ifdef EXPORT_DUMP_STATUS_TASKS
+/*
+	Task used to dump status tasks - For Reference for format export see https://www.freertos.org/a00021.html#vTaskList
+*/
+void DumpStatusTasks()
+{
+	vTaskList(szList);
+}
+#endif
+
 /**
  * \brief Task Controller
  */
@@ -249,7 +279,7 @@ static void task_controller(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
-	c_control_lqrArthur_init();
+	//c_control_lqrArthur_init();
 	
 	while(true)
 	{
@@ -401,12 +431,28 @@ static void task_communication(void *pvParameters)
 	
 	while(true)
 	{
+		if(ReadCounterMiliSeconds() < MS_INIT_USB_MILISECOND)
+		{
+			continue;
+		}
+		
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_INIT_EXECUTION);
+		
 		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
 		{
 			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
 		}
-
+		
+		#ifdef EXPORT_DUMP_STATUS_TASKS
+		char * token = strtok(szList, "\n");
+		while(token != NULL)
+		{
+			printf("%s\n", token); //printing each token
+			token = strtok(NULL, "\n");
+		}
+		memset(&szList[0],0,size_buffer_export);
+		#endif
+		
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_END_EXECUTION);
 		counter_tasks_runtime[TASK_IDENTIFIER_COMMUNICATION-1]++;
 		vTaskDelay(10);
@@ -436,7 +482,7 @@ int main(void)
 	//Start RunTime Verification Lib
 	#ifdef ONLINE_VERIFICATION
 	init_buffer_tasks_runtime_verification_online();
-	rtmlib_init(&Identifiers_Tasks,&Vector_Deadline_Tasks,&Vector_WCET_Tasks);
+	rtmlib_init(&Identifiers_Tasks,&Vector_Deadline_Tasks,&Vector_Period_Tasks,&Vector_WCET_Tasks);
 	#endif
 	#ifdef OFFLINE_VERIFICATION
 	rtmlib_init();
@@ -447,34 +493,33 @@ int main(void)
 	printf("-- %s\n\r", BOARD_NAME);
 	printf("-- Compiled: %s %s --\n\r", __DATE__, __TIME__);
 	
-
 	/* Create task to controller */
-	if (xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL,
-			TASK_CONTROLLER_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL, TASK_CONTROLLER_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create Controller task\r\n");
 	}
-	
+
 	/* Create task communication */
-	if (xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL,
-	TASK_COMMUNICATION_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL, TASK_COMMUNICATION_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create coomunication task\r\n");
 	}
 
 	/* Create task to make led blink */
-	if (xTaskCreate(task_led_hlc, "Led", TASK_LED_HLC_STACK_SIZE, NULL,
-			TASK_LED_HLC_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_led_hlc, "Led", TASK_LED_HLC_STACK_SIZE, NULL, TASK_LED_HLC_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create led task\r\n");
 	}
 	
 	/* Create task to make Dummy Sensing */
-	if (xTaskCreate(task_dummy_sensing, "Dummy Sensing", TASK_DUMMY_SENSING_STACK_SIZE, NULL,
-	TASK_DUMMY_SENSING_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_dummy_sensing, "Dummy Sensing", TASK_DUMMY_SENSING_STACK_SIZE, NULL, TASK_DUMMY_SENSING_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create dummy task\r\n");
 	}
 	
 	/* Create task to make Dummy Actuation */
-	if (xTaskCreate(task_dummy_actuation, "Dummy Actuation", TASK_DUMMY_ACTUATION_STACK_SIZE, NULL,
-	TASK_DUMMY_ACTUATION_STACK_PRIORITY, NULL) != pdPASS) {
+	if(xTaskCreate(task_dummy_actuation, "Dummy Actuation", TASK_DUMMY_ACTUATION_STACK_SIZE, NULL,TASK_DUMMY_ACTUATION_PRIORITY, NULL) != pdPASS)
+	{
 		printf("Failed to create dummy task\r\n");
 	}
 	

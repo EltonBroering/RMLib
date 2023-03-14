@@ -29,7 +29,6 @@ uint16_t counter_tasks_runtime_verification[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Identifiers_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Vector_WCET_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
 uint32_t Vector_Deadline_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
-uint32_t Vector_Period_Tasks[NUMBER_TASKS_RUNTIME_VERIFICATION];
 EventTimeStamp_t TimeStampsBufferProcessing[NUMBER_TASKS_RUNTIME_VERIFICATION][2];
 #endif
 
@@ -144,7 +143,7 @@ uint16_t cb_size(CircularBuffer_t *cb)
 /**
  * \brief Init RMLib
 **/
-void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * period_service,uint32_t * wcet_service)
+void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * wcet_service)
 {
 	cb_init(&QueueTimeStamps,&QueueTimeStampVerdictsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStampVeredict_t));
 	
@@ -153,7 +152,6 @@ void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint3
 	memcpy(&Identifiers_Tasks,tasks_identifiers,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
 	memcpy(&Vector_WCET_Tasks,wcet_service,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
 	memcpy(&Vector_Deadline_Tasks,deadlines_service,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
-	memcpy(&Vector_Period_Tasks,period_service,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
 }
 
 /**
@@ -205,27 +203,13 @@ int8_t timestamp_runtime(uint32_t task_identifier,uint16_t task_state)
 			TimeStampInsert.Status_of_WCET_Task = false;
 		}
 		
-		if(Vector_Period_Tasks[task_index] == 0)
+		if((TimeStampInsert.ExecutionTime + TimeStampInsert.TimeStamp) <= (Vector_Deadline_Tasks[task_index] * TimeStampInsert.CounterTask))
 		{
-			if((TimeStampInsert.ExecutionTime + TimeStampInsert.TimeStamp) <= Vector_Deadline_Tasks[task_index])
-			{
-				TimeStampInsert.Status_of_DeadLine_Task = true;
-			}
-			else
-			{
-				TimeStampInsert.Status_of_DeadLine_Task = false;
-			}
+			TimeStampInsert.Status_of_DeadLine_Task = true;
 		}
 		else
 		{
-			if((TimeStampInsert.ExecutionTime + TimeStampInsert.TimeStamp) <= (Vector_Period_Tasks[task_index] * TimeStampInsert.CounterTask))
-			{
-				TimeStampInsert.Status_of_DeadLine_Task = true;
-			}
-			else
-			{
-				TimeStampInsert.Status_of_DeadLine_Task = false;
-			}	
+			TimeStampInsert.Status_of_DeadLine_Task = false;
 		}
 		#ifdef EXPORT_ONLY_RTOS_ERRORS
 		if(!TimeStampInsert.Status_of_DeadLine_Task || !TimeStampInsert.Status_of_WCET_Task)
