@@ -14,6 +14,7 @@ while True:
 		time.sleep(0.01)
 
 vector_deadlines = [12,12,12,120,600]
+vector_period = [12,12,12,120,600]
 vector_wcet = [2,3,4,4,135]
 
 
@@ -34,15 +35,22 @@ def analyze_data(item):
 			it = vector_itens_analyzed.pop(item["TaskIdentifier"])
 			if(len(it) > 1):
 				print(it)
+				
 				if (it[1]["TimeStamp"] - it[0]["TimeStamp"]) <= vector_wcet[it[0]["TaskIdentifier"]-1]:
 					print("Task " + str(it[0]["TaskIdentifier"]) + " Condition WCET: T - WCET Time: " + str((it[1]["TimeStamp"] - it[0]["TimeStamp"])))
 				else:
-			 		print("Task " + str(it[0]["TaskIdentifier"]) + " Condition WCET: F - WCET Time: " + str((it[1]["TimeStamp"] - it[0]["TimeStamp"])))
+					print("Task " + str(it[0]["TaskIdentifier"]) + " Condition WCET: F - WCET Time: " + str((it[1]["TimeStamp"] - it[0]["TimeStamp"])))
 
-				if((it[1]["TaskCounter"]*vector_deadlines[it[1]["TaskIdentifier"]-1]) >= it[1]["TimeStamp"]):
-					print("Task " + str(it[0]["TaskIdentifier"]) + " Condition DeadLine: T")
+				if (vector_period[it[0]["TaskIdentifier"]-1] == 0):
+					if((vector_wcet[it[1]["TaskIdentifier"]-1]) >= it[1]["TimeStamp"]):
+						print("Task " + str(it[0]["TaskIdentifier"]) + " Condition DeadLine: T")
+					else:
+						print("Task " + str(it[0]["TaskIdentifier"]) + " Condition DeadLine: F")
 				else:
-					print("Task " + str(it[0]["TaskIdentifier"]) + " Condition DeadLine: F")
+					if ((it[1]["TaskCounter"]*vector_period[it[1]["TaskIdentifier"]-1]) >= it[1]["TimeStamp"]):
+						print("Task " + str(it[0]["TaskIdentifier"]) + " Condition DeadLine: T")
+					else:
+						print("Task " + str(it[0]["TaskIdentifier"]) + " Condition DeadLine: F")
 				print("Task " + str(it[0]["TaskIdentifier"]) + " TimeStamp: " + str(it[1]["TimeStamp"]) + " DeadLine: " + str(it[1]["TaskCounter"]*vector_deadlines[it[1]["TaskIdentifier"]-1]))
 
 
