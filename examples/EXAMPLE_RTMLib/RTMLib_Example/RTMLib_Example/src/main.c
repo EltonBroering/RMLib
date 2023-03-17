@@ -154,11 +154,11 @@ char str_export_aux[size_buffer_export];
 
 #define TASK_COMMUNCATION_PERIODIC
 
-//#define ASYNCHRONOUS_TASK
+#define ASYNCHRONOUS_TASK
 
 #ifdef ASYNCHRONOUS_TASK
 #define TASK_ASYNCHRONOUS_STACK_SIZE			(configMINIMAL_STACK_SIZE)
-#define TASK_ASYNCHRONOUS_PRIORITY				(tskIDLE_PRIORITY+5)
+#define TASK_ASYNCHRONOUS_PRIORITY				(tskIDLE_PRIORITY+6)
 #define TASK_IDENTIFIER_ASYNCHRONOUS			6
 #define TASK_ASYNCHRONOUS_WORST_CASE			4
 #define TASK_ASYNCHRONOUS_DEADLINE				12
@@ -505,6 +505,8 @@ static void task_communication(void *pvParameters)
 static void task_asynchronous(void *pvParameters)
 {
 	UNUSED(pvParameters);
+	
+	vTaskSuspend(NULL);
 	
 	while(true)
 	{
