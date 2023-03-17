@@ -97,6 +97,11 @@
 #define TASK_DUMMY_ACTUATION_STACK_SIZE			(configMINIMAL_STACK_SIZE)
 #define TASK_DUMMY_ACTUATION_PRIORITY			(tskIDLE_PRIORITY+5)
 
+xTaskHandle TaskHandle_Communication;
+xTaskHandle TaskHandle_LedHLC;
+xTaskHandle TaskHandle_Controller;
+xTaskHandle TaskHandle_DummySensing;
+xTaskHandle TaskHandle_DummyActuation;
 
 #define TASK_IDENTIFIER_DUMMY_ACTUATION			1
 #define TASK_IDENTIFIER_DUMMY_SENSING			2
@@ -147,10 +152,19 @@ char str_export_aux[size_buffer_export];
 #endif
 #endif
 
-#define ASSYNCRONOUS_TASK
+#define TASK_COMMUNCATION_PERIODIC
 
-#ifdef ASSYNCRONOUS_TASK
+//#define ASYNCHRONOUS_TASK
 
+#ifdef ASYNCHRONOUS_TASK
+#define TASK_ASYNCHRONOUS_STACK_SIZE			(configMINIMAL_STACK_SIZE)
+#define TASK_ASYNCHRONOUS_PRIORITY				(tskIDLE_PRIORITY+5)
+#define TASK_IDENTIFIER_ASYNCHRONOUS			6
+#define TASK_ASYNCHRONOUS_WORST_CASE			4
+#define TASK_ASYNCHRONOUS_DEADLINE				12
+#define TASK_ASYNCHRONOUS_PERIOD				0
+#define NUMBER_TASKS							6
+xTaskHandle TaskHandle_Asynchronous;
 #endif
 
 pv_type_actuation	controller_ouput;
@@ -245,6 +259,15 @@ void init_buffer_tasks_runtime_verification_online()
 				Vector_Deadline_Tasks[count_task]	= TASK_COMMUNICATION_PERIOD;
 				Vector_Period_Tasks[count_task]		= TASK_COMMUNICATION_PERIOD;
 				break;
+				
+			#ifdef ASYNCHRONOUS_TASK
+			case TASK_IDENTIFIER_ASYNCHRONOUS:
+				Identifiers_Tasks[count_task]		= TASK_IDENTIFIER_ASYNCHRONOUS;
+				Vector_WCET_Tasks[count_task]		= TASK_ASYNCHRONOUS_WORST_CASE;
+				Vector_Deadline_Tasks[count_task]	= TASK_ASYNCHRONOUS_DEADLINE;
+				Vector_Period_Tasks[count_task]		= TASK_ASYNCHRONOUS_PERIOD;
+				break;
+			#endif
 				
 			default:
 				break;
@@ -455,10 +478,94 @@ static void task_communication(void *pvParameters)
 		
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_END_EXECUTION);
 		counter_tasks_runtime[TASK_IDENTIFIER_COMMUNICATION-1]++;
+		
+		#ifdef TASK_COMMUNCATION_PERIODIC
+		uint32_t MileSecondsTask = ReadCounterMiliSeconds();
+		uint32_t ValueTaskDelay;
+		
+		if(TASK_COMMUNICATION_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_COMMUNICATION-1] > MileSecondsTask)
+		{
+			ValueTaskDelay = ((TASK_COMMUNICATION_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_COMMUNICATION-1]) - MileSecondsTask);
+		}
+		else
+		{
+			ValueTaskDelay = 0;
+		}
+		vTaskDelay(ValueTaskDelay);
+		#else
 		vTaskDelay(10);
+		#endif
 	}
 }
 
+#ifdef ASYNCHRONOUS_TASK
+/**
+ * \brief Task Asyncronous
+ */
+static void task_asynchronous(void *pvParameters)
+{
+	UNUSED(pvParameters);
+	
+	while(true)
+	{
+		vTaskSuspendAll();
+		
+		uint32_t count_tmp = 0;
+		while(count_tmp <  (TASK_ASYNCHRONOUS_WORST_CASE*MS_COUNTS_DUMMY))
+		{
+			count_tmp++;
+		}
+		timestamp_runtime(TASK_IDENTIFIER_ASYNCHRONOUS,TASK_END_EXECUTION);
+		xTaskResumeAll();	
+		vTaskSuspend(NULL);	
+	}
+}
+
+uint8_t initial_transition = false;
+
+/**
+ *  \brief Handler for Button 1 rising edge interrupt.
+ *
+ *  Set button1 event flag (g_button_event).
+ */
+static void button_handler(uint32_t id, uint32_t mask)
+{
+	if ((PIN_SW0_ID == id) && (PIN_SW0_MASK == mask))
+	{
+		if(initial_transition)
+		{
+			vTaskResume(TaskHandle_Asynchronous);
+			timestamp_runtime(TASK_IDENTIFIER_ASYNCHRONOUS,TASK_INIT_EXECUTION);
+		}
+		initial_transition = true;
+	}
+}
+
+/**
+ *  \brief Configure the push button.
+ *
+ *  Configure the PIOs as inputs and generate corresponding interrupt when
+ *  pressed or released.
+ */
+static void configure_button(void)
+{
+	/* Configure PIO clock. */
+	pmc_enable_periph_clk(PIN_SW0_ID);
+
+	/* Adjust pio debounce filter parameters, uses 10 Hz filter. */
+	pio_set_debounce_filter(PIN_SW0_PIO, PIN_SW0_MASK, 10);
+
+	/* Initialize pios interrupt handlers, see PIO definition in board.h. */
+	pio_handler_set(PIN_SW0_PIO, PIN_SW0_ID, PIN_SW0_MASK,
+		PIN_SW0_ATTR, button_handler);
+
+	/* Enable PIO controller IRQs. */
+	NVIC_EnableIRQ((IRQn_Type)PIN_SW0_ID);
+
+	/* Enable PIO line interrupts. */
+	pio_enable_interrupt(PIN_SW0_PIO, PIN_SW0_MASK);
+}
+#endif
 
 /**
  *  \brief FreeRTOS Real Time Kernel example entry point.
@@ -478,6 +585,10 @@ int main(void)
 	stdio_usb_init();
 	
 	Timer_init();
+
+	#ifdef ASYNCHRONOUS_TASK
+	configure_button();
+	#endif
 	
 	//Start RunTime Verification Lib
 	#ifdef ONLINE_VERIFICATION
@@ -494,34 +605,42 @@ int main(void)
 	printf("-- Compiled: %s %s --\n\r", __DATE__, __TIME__);
 	
 	/* Create task to controller */
-	if(xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL, TASK_CONTROLLER_PRIORITY, NULL) != pdPASS)
+	if(xTaskCreate(task_controller, "Controller", TASK_CONTROLLER_STACK_SIZE, NULL, TASK_CONTROLLER_PRIORITY,&TaskHandle_Controller) != pdPASS)
 	{
 		printf("Failed to create Controller task\r\n");
 	}
 
 	/* Create task communication */
-	if(xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL, TASK_COMMUNICATION_PRIORITY, NULL) != pdPASS)
+	if(xTaskCreate(task_communication, "Communication", TASK_COMMUNICATION_STACK_SIZE, NULL, TASK_COMMUNICATION_PRIORITY,&TaskHandle_Communication) != pdPASS)
 	{
 		printf("Failed to create coomunication task\r\n");
 	}
 
 	/* Create task to make led blink */
-	if(xTaskCreate(task_led_hlc, "Led", TASK_LED_HLC_STACK_SIZE, NULL, TASK_LED_HLC_PRIORITY, NULL) != pdPASS)
+	if(xTaskCreate(task_led_hlc, "Led", TASK_LED_HLC_STACK_SIZE, NULL, TASK_LED_HLC_PRIORITY, &TaskHandle_LedHLC) != pdPASS)
 	{
 		printf("Failed to create led task\r\n");
 	}
 	
 	/* Create task to make Dummy Sensing */
-	if(xTaskCreate(task_dummy_sensing, "Dummy Sensing", TASK_DUMMY_SENSING_STACK_SIZE, NULL, TASK_DUMMY_SENSING_PRIORITY, NULL) != pdPASS)
+	if(xTaskCreate(task_dummy_sensing, "Dummy Sensing", TASK_DUMMY_SENSING_STACK_SIZE, NULL, TASK_DUMMY_SENSING_PRIORITY, &TaskHandle_DummySensing) != pdPASS)
 	{
 		printf("Failed to create dummy task\r\n");
 	}
 	
 	/* Create task to make Dummy Actuation */
-	if(xTaskCreate(task_dummy_actuation, "Dummy Actuation", TASK_DUMMY_ACTUATION_STACK_SIZE, NULL,TASK_DUMMY_ACTUATION_PRIORITY, NULL) != pdPASS)
+	if(xTaskCreate(task_dummy_actuation, "Dummy Actuation", TASK_DUMMY_ACTUATION_STACK_SIZE, NULL,TASK_DUMMY_ACTUATION_PRIORITY, &TaskHandle_DummyActuation) != pdPASS)
 	{
 		printf("Failed to create dummy task\r\n");
 	}
+	
+	#ifdef ASYNCHRONOUS_TASK
+	/* Create task to make Asynchronous Task */
+	if(xTaskCreate(task_asynchronous, "Asynchronous", TASK_ASYNCHRONOUS_STACK_SIZE, NULL,TASK_ASYNCHRONOUS_PRIORITY, &TaskHandle_Asynchronous) != pdPASS)
+	{
+		printf("Failed to create asynchronous task\r\n");
+	}
+	#endif
 	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
