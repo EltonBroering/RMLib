@@ -149,7 +149,6 @@ void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint3
 	cb_init(&QueueTimeStamps,&QueueTimeStampVerdictsBuffer[0],(size_t)SIZE_RUN_TIME_BUFFER_QUEUE,(size_t)sizeof(TimeStampVeredict_t));
 	
 	memset(&counter_tasks_runtime_verification,0x00,sizeof(uint16_t)*NUMBER_TASKS_RUNTIME_VERIFICATION);
-	
 	memcpy(&Identifiers_Tasks,tasks_identifiers,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
 	memcpy(&Vector_WCET_Tasks,wcet_service,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
 	memcpy(&Vector_Deadline_Tasks,deadlines_service,NUMBER_TASKS_RUNTIME_VERIFICATION * sizeof(uint32_t));
