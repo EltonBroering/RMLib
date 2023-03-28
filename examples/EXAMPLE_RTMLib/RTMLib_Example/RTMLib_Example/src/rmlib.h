@@ -1,12 +1,12 @@
 /*
- * rtmlib.h
+ * rmlib.h
  *
  * Created: 4/19/2022 9:56:26 PM
  */ 
 
 
-#ifndef RTMLIB_H_
-#define RTMLIB_H_
+#ifndef RMLIB_H_
+#define RMLIB_H_
 
 #include <string.h>
 #include <stdint.h>
@@ -80,11 +80,11 @@ extern int printf(const char * restrict format, ... );
 
 
 #ifdef ONLINE_VERIFICATION
-void rtmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * period_service,uint32_t * wcet_service);
+void rmlib_init(uint32_t * tasks_identifiers,uint32_t * deadlines_service,uint32_t * period_service,uint32_t * wcet_service);
 
-int8_t rtmlib_export_data(TimeStampVeredict_t * buffer_rtmlib);
+int8_t rmlib_export_data(TimeStampVeredict_t * buffer_rmlib);
 
-const char rtmlib_export_data_string(TimeStampVeredict_t * buffer_rtmlib);
+const char rmlib_export_data_string(TimeStampVeredict_t * buffer_rmlib);
 
 #ifdef EXPORT_DUMP_STATUS_TASKS
 extern void DumpStatusTasks(void);
@@ -93,11 +93,11 @@ extern void DumpStatusTasks(void);
 #endif
 
 #ifdef OFFLINE_VERIFICATION
-void rtmlib_init();
+void rmlib_init();
 
-int8_t rtmlib_export_data(EventTimeStamp_t * buffer_rtmlib);
+int8_t rmlib_export_data(EventTimeStamp_t * buffer_rmlib);
 
-const char rtmlib_export_data_string(EventTimeStamp_t * buffer_rtmlib);
+const char rmlib_export_data_string(EventTimeStamp_t * buffer_rmlib);
 #endif
 
-#endif /* RTMLIB_H_ */
+#endif /* RMLIB_H_ */

@@ -15,7 +15,7 @@
 
 #include "arm_math.h"
 
-#include "rtmlib.h"
+#include "rmlib.h"
 
 #include "Timings.h"
 

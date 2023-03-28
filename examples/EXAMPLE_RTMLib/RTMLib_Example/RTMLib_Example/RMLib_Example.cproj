@@ -13,7 +13,7 @@
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
     <AssemblyName>FREERTOS_SAM_EXAMPLE1</AssemblyName>
-    <Name>RTMLib_Example</Name>
+    <Name>RMLib_Example</Name>
     <RootNamespace>FREERTOS_SAM_EXAMPLE1</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
@@ -743,10 +743,10 @@
     <Compile Include="src\Includes.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\rtmlib.c">
+    <Compile Include="src\rmlib.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\rtmlib.h">
+    <Compile Include="src\rmlib.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\Timings.c">

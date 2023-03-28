@@ -154,7 +154,7 @@ char str_export_aux[size_buffer_export];
 
 #define TASK_COMMUNCATION_PERIODIC
 
-//#define ASYNCHRONOUS_TASK
+#define ASYNCHRONOUS_TASK
 
 #ifdef ASYNCHRONOUS_TASK
 #define TASK_ASYNCHRONOUS_STACK_SIZE			(configMINIMAL_STACK_SIZE)
@@ -461,9 +461,9 @@ static void task_communication(void *pvParameters)
 		
 		timestamp_runtime(TASK_IDENTIFIER_COMMUNICATION,TASK_INIT_EXECUTION);
 		
-		while(rtmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
+		while(rmlib_export_data(&QueueTimeStampsBufferDumped) == COMMAND_OK)
 		{
-			rtmlib_export_data_string(&QueueTimeStampsBufferDumped);
+			rmlib_export_data_string(&QueueTimeStampsBufferDumped);
 		}
 		
 		#ifdef EXPORT_DUMP_STATUS_TASKS
@@ -595,10 +595,10 @@ int main(void)
 	//Start RunTime Verification Lib
 	#ifdef ONLINE_VERIFICATION
 	init_buffer_tasks_runtime_verification_online();
-	rtmlib_init(&Identifiers_Tasks,&Vector_Deadline_Tasks,&Vector_Period_Tasks,&Vector_WCET_Tasks);
+	rmlib_init(&Identifiers_Tasks,&Vector_Deadline_Tasks,&Vector_Period_Tasks,&Vector_WCET_Tasks);
 	#endif
 	#ifdef OFFLINE_VERIFICATION
-	rtmlib_init();
+	rmlib_init();
 	#endif
 
 	/* Output demo information. */
