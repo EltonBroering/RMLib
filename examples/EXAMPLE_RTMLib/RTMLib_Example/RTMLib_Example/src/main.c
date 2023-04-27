@@ -164,6 +164,7 @@ char str_export_aux[size_buffer_export];
 #define TASK_ASYNCHRONOUS_DEADLINE				15
 #define TASK_ASYNCHRONOUS_PERIOD				0
 #define NUMBER_TASKS							6
+#define NUMBER_TASKS_RUNTIME_VERIFICATION		NUMBER_TASKS
 xTaskHandle TaskHandle_Asynchronous;
 #endif
 
