@@ -6,16 +6,17 @@ import time
 
 while True:
 	try:
-		ser = serial.Serial('/dev/ttyACM0',576000,timeout=30,rtscts=1)  # open serial port
+		ser = serial.Serial(serial_interface,576000,timeout=30,rtscts=1)  # open serial port
 		print("Interface Serial : " + ser.name)         # check which port was really used
 		break
 	except:
 		print("Error in open serial")
 		time.sleep(0.01)
 
-vector_deadlines = [12,12,12,120,600]
-vector_period = [12,12,12,120,600]
-vector_wcet = [2,3,4,4,135]
+vector_deadlines	=	[12,12,12,120,600];
+vector_period		=	[12,12,12,120,600];
+vector_wcet			=	[2,3,4,4,135];
+serial_interface 	=	'/dev/ttyACM0';
 
 
 vector_itens_analyzed = {}
