@@ -1,14 +1,14 @@
 /**
   ******************************************************************************
-  * @file    modules/control/c_control_lqrArthur.c
+  * @file    modules/control/c_control_lqr.c
   * @author  Iuro Nascimento
   * @version V1.0.0
   * @date    28-July-2016
-  * @brief   Implementa controlador lqrArthur baseado em c_rc_lqrArthur_control de Rodrigo Donadel.
+  * @brief   Implementa controlador lqr baseado em c_rc_lqr_control de Rodrigo Donadel.
   ******************************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
-#include "c_control_lqrArthur.h"
+#include "c_control_lqr.h"
 
 
 //---------------------------------------------------------------------------------------------
@@ -68,10 +68,10 @@ float32_t xint, x_ant, yint, y_ant, zint, z_ant, yawint, yaw_ant, T;
 
 arm_matrix_instance_f32 state_vector, equilibrium_point;
 /* Private function prototypes -----------------------------------------------*/
-/* static arm_matrix_instance_f32 c_control_lqrArthur_calcErrorStateVector(pv_type_datapr_attitude attitude, pv_type_datapr_attitude attitude_reference, pv_type_datapr_position position, pv_type_datapr_position position_reference); */
+/* static arm_matrix_instance_f32 c_control_lqr_calcErrorStateVector(pv_type_datapr_attitude attitude, pv_type_datapr_attitude attitude_reference, pv_type_datapr_position position, pv_type_datapr_position position_reference); */
 
 /* Private functions ---------------------------------------------------------*/
-void c_control_lqrArthur_calcErrorStateVector(pv_msg_input * inputData)
+void c_control_lqr_calcErrorStateVector(pv_msg_input * inputData)
 {	
 	
 	attitude = inputData->attitude;
@@ -163,7 +163,7 @@ void c_control_lqrArthur_calcErrorStateVector(pv_msg_input * inputData)
  * a qual o ponteiro aponta saia de escopo e seja deletada. Uma vez que as funções são privadas e chamadas
  * em ordem determinística, mutexes não são implementadas (por simplicidade apenas)
  */
-void c_control_lqrArthur_init()
+void c_control_lqr_init()
 {
 
 	// Inicializa as matrizes estaticas
@@ -173,8 +173,8 @@ void c_control_lqrArthur_init()
 
 
 
-/** \brief lqrArthur Controller.  */
-void c_control_lqrArthur_controller(pv_msg_input * inputData, pv_type_actuation * output_data)
+/** \brief lqr Controller.  */
+void c_control_lqr_controller(pv_msg_input * inputData, pv_type_actuation * output_data)
 {
 	//Initialize result matrices
 	arm_mat_init_f32(&control_output, 4, 1, (float32_t *)control_output_f32);
@@ -183,7 +183,7 @@ void c_control_lqrArthur_controller(pv_msg_input * inputData, pv_type_actuation 
 	pv_type_stability_error error;
 	float temp_height_takeoff;
 
-	c_control_lqrArthur_calcErrorStateVector(inputData);
+	c_control_lqr_calcErrorStateVector(inputData);
 		
 	/* -delta_u = K*delta_x */
 	//arm_mat_mult_f32(&K, &error_state_vector, &delta_control);  // @todo

@@ -755,10 +755,10 @@
     <Compile Include="src\Timings.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\VANT\c_control_lqrArthur.c">
+    <Compile Include="src\VANT\c_control_lqr.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\VANT\c_control_lqrArthur.h">
+    <Compile Include="src\VANT\c_control_lqr.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\VANT\pv_typedefs.h">

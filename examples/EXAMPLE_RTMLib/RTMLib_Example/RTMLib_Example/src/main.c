@@ -303,13 +303,13 @@ static void task_controller(void *pvParameters)
 {
 	UNUSED(pvParameters);
 	
-	//c_control_lqrArthur_init();
+	c_control_lqr_init();
 	
 	while(true)
 	{
 		vTaskSuspendAll();
 		timestamp_runtime(TASK_IDENTIFIER_CONTROLLER,TASK_INIT_EXECUTION);
-		//c_control_lqrArthur_controller(&controller_input,&controller_ouput);
+		c_control_lqr_controller(&controller_input,&controller_ouput);
 		uint32_t count_tmp = 0;
 		while(count_tmp <  (TASK_CONTROLLER_WORST_CASE*MS_COUNTS_DUMMY))
 		{

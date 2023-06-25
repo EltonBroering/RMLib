@@ -8,8 +8,8 @@
   *****************************************************************************/
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef C_CONTROL_LQRARTHUR_H
-#define C_CONTROL_LQRARTHUR_H
+#ifndef C_CONTROL_LQR_H
+#define C_CONTROL_LQR_H
 
 #define ARM_MATH_CM4
 
@@ -27,10 +27,10 @@
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions ------------------------------------------------------- */
-void c_control_lqrArthur_init();
+void c_control_lqr_init();
 
 //LQR attitude and height(AH) controller. Height control depends on global variable manual_height_control.
-void c_control_lqrArthur_controller(pv_msg_input * inputData, pv_type_actuation * output_data);
+void c_control_lqr_controller(pv_msg_input * inputData, pv_type_actuation * output_data);
 
 #ifdef __cplusplus
 }

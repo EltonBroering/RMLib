@@ -21,6 +21,6 @@
 
 #include "VANT/pv_typedefs.h"
 
-#include "VANT/c_control_lqrArthur.h"
+#include "VANT/c_control_lqr.h"
 
 #endif /* INCLUDES_H_ */
