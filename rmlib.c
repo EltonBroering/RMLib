@@ -254,7 +254,7 @@ int8_t rmlib_export_data(TimeStampVeredict_t * buffer_rmlib)
  */
 const char rmlib_export_data_string(TimeStampVeredict_t * buffer_rmlib)
 {
-	#ifdef OPTIMIZE_EXPORT_DATA
+	#ifdef COMPACT_EXPORT_DATA
 	printf("IT%d-TS%d-ET%d-CT%d-SW%d-SD%d\n", buffer_rmlib->Identifier_of_Task, buffer_rmlib->TimeStamp, buffer_rmlib->ExecutionTime, buffer_rmlib->CounterTask, buffer_rmlib->Status_of_WCET_Task, buffer_rmlib->Status_of_DeadLine_Task);
 	#else 
 	printf("{\"TaskIdentifier\":%d,\"TimeStamp\":%d,\"ExecutionTime\":%d,\"CounterTask\":%d,\"StatusWCET\":%d,\"StatusDeadline\":%d}\n", buffer_rmlib->Identifier_of_Task, buffer_rmlib->TimeStamp, buffer_rmlib->ExecutionTime, buffer_rmlib->CounterTask, buffer_rmlib->Status_of_WCET_Task, buffer_rmlib->Status_of_DeadLine_Task);
@@ -319,7 +319,7 @@ int8_t rmlib_export_data(EventTimeStamp_t * buffer_rmlib)
  */
 const char rmlib_export_data_string(EventTimeStamp_t * buffer_rmlib)
 {
-	#ifdef OPTIMIZE_EXPORT_DATA
+	#ifdef COMPACT_EXPORT_DATA
 	printf("I%d-S%d-T%d-C%d\n",buffer_rmlib->Identifier_of_Task,buffer_rmlib->State_of_Task,buffer_rmlib->TimeStamp,buffer_rmlib->CounterTask);
 	#else 
 	printf("{\"TaskIdentifier\" : %d,\"TaskState\" : %d,\"TimeStamp\" : %d,\"TaskCounter\" : %d}\n",buffer_rmlib->Identifier_of_Task,buffer_rmlib->State_of_Task,buffer_rmlib->TimeStamp,buffer_rmlib->CounterTask);

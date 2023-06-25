@@ -29,8 +29,8 @@
 
 #define				ONLINE_VERIFICATION
 
-// Use this define to improve the optimization of data export
-//#define				OPTIMIZE_EXPORT_DATA
+// Use this define to improve the compact of data export
+//#define				COMPACT_EXPORT_DATA
 
 #ifndef ONLINE_VERIFICATION
 #define				OFFLINE_VERIFICATION

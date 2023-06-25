@@ -55,7 +55,7 @@ def analyze_data(item):
 				print("Task " + str(it[0]["TaskIdentifier"]) + " TimeStamp: " + str(it[1]["TimeStamp"]) + " DeadLine: " + str(it[1]["TaskCounter"]*vector_deadlines[it[1]["TaskIdentifier"]-1]))
 
 
-def process_optimize_data(item):
+def process_compact_data(item):
 	dict_tmp = {}
 	items = item.strip().split("-")
 	dict_tmp["TaskIdentifier"] 	= int(items[0].split("I")[1])
@@ -66,7 +66,7 @@ def process_optimize_data(item):
 
 def process_data(item):
 	if(item[0] == "I"):
-		return process_optimize_data(item)
+		return process_compact_data(item)
 	else:
 		return json.loads(item)
 
