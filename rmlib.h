@@ -17,8 +17,9 @@
 
 #define SIZE_RUN_TIME_BUFFER_QUEUE		1000
 
+#ifndef NUMBER_TASKS_RUNTIME_VERIFICATION
 #define NUMBER_TASKS_RUNTIME_VERIFICATION	5
-
+#endif
 
 #define COMMAND_OK						0			//Queued command was executed successfully (Insert/Remove)
 #define COMMAND_NOK						1			//Queued command cannot be executed (Insert with full queue / Remove with empty queue)

@@ -110,6 +110,7 @@ xTaskHandle TaskHandle_DummyActuation;
 #define TASK_IDENTIFIER_COMMUNICATION			5
 
 #define NUMBER_TASKS							5
+#define NUMBER_TASKS_RUNTIME_VERIFICATION		NUMBER_TASKS
 
 uint32_t counter_tasks_runtime[NUMBER_TASKS];
 
