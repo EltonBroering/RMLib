@@ -90,7 +90,7 @@
 #define TASK_COMMUNICATION_PRIORITY				(tskIDLE_PRIORITY+1)
 #define TASK_LED_HLC_STACK_SIZE					(configMINIMAL_STACK_SIZE)
 #define TASK_LED_HLC_PRIORITY					(tskIDLE_PRIORITY+3)
-#define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE)
+#define TASK_CONTROLLER_STACK_SIZE				(configMINIMAL_STACK_SIZE * 4)
 #define TASK_CONTROLLER_PRIORITY				(tskIDLE_PRIORITY+2)
 #define TASK_DUMMY_SENSING_STACK_SIZE			(configMINIMAL_STACK_SIZE)
 #define TASK_DUMMY_SENSING_PRIORITY				(tskIDLE_PRIORITY+4)
@@ -155,7 +155,7 @@ char str_export_aux[size_buffer_export];
 
 #define TASK_COMMUNCATION_PERIODIC
 
-#define ASYNCHRONOUS_TASK
+//#define ASYNCHRONOUS_TASK
 
 #ifdef ASYNCHRONOUS_TASK
 #define TASK_ASYNCHRONOUS_STACK_SIZE			(configMINIMAL_STACK_SIZE)
@@ -324,13 +324,12 @@ static void task_controller(void *pvParameters)
 		if((TASK_CONTROLLER_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_CONTROLLER-1]) > MileSecondsTask)
 		{
 			ValueTaskDelay = (TASK_CONTROLLER_PERIOD*counter_tasks_runtime[TASK_IDENTIFIER_CONTROLLER-1] - MileSecondsTask);
+			vTaskDelay(ValueTaskDelay);
 		}
 		else
 		{
-			ValueTaskDelay = 0;
+			xTaskResumeAll();
 		}
-		vTaskDelay(ValueTaskDelay);
-		xTaskResumeAll();
 	}
 }
 

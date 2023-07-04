@@ -24,7 +24,7 @@
 
 static pv_type_stability_error last_error;
 
-/* DlqrArthur */
+/* Dlqr */
 static float32_t K_f32[4][20] = {{-0.000509474023994 ,  1.381002006541810 ,  2.044930990723325 , -4.098388643419657 ,  0.002544968427177 ,  0.065243786421189, -0.011997162152724 ,  0.012231188237446 , -0.000191109567030 ,  0.977046060078436  , 2.067519443836474 , -1.069820095142832,
 0.003981280957280 ,  0.048837474399233 , -0.000157117358773  , 0.000160465562387 , -0.000324184653490 ,  0.932396154093819,
 0.987708499654750 ,  0.029590812630684},
@@ -45,12 +45,12 @@ static float32_t K_f32[4][20] = {{-0.000509474023994 ,  1.381002006541810 ,  2.0
 0.000009316184096 , -0.021344301330953}
 };
 
-static float32_t equilibrium_point_f32[20] = {2.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-static float32_t equilibrium_control_f32[4] = {10.2751, 10.2799, 0.0, 0.0};
-static float32_t state_vector_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-static float32_t error_state_vector_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-static float32_t control_output_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-static float32_t delta_control_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float32_t equilibrium_point_f32[20] = {2.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float32_t equilibrium_control_f32[4] = {10.2751, 10.2799, 0.0, 0.0};
+float32_t state_vector_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float32_t error_state_vector_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float32_t control_output_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float32_t delta_control_f32[20] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 static arm_matrix_instance_f32 equilibrium_control;
 static arm_matrix_instance_f32 K;
@@ -72,8 +72,7 @@ arm_matrix_instance_f32 state_vector, equilibrium_point;
 
 /* Private functions ---------------------------------------------------------*/
 void c_control_lqr_calcErrorStateVector(pv_msg_input * inputData)
-{	
-	
+{		
 	attitude = inputData->attitude;
 	attitude_reference = inputData->attitude_reference;
 	position = inputData->position;
@@ -145,8 +144,7 @@ void c_control_lqr_calcErrorStateVector(pv_msg_input * inputData)
 	arm_mat_init_f32(&error_state_vector, 20, 1, (float32_t *)error_state_vector_f32);
 	
 	//e(t)=x(t)- equilibrium_point
-	//arm_mat_sub_f32(&state_vector, &equilibrium_point, &error_state_vector); // @todo
-
+	arm_mat_sub_f32(&state_vector, &equilibrium_point, &error_state_vector);
 	return;
 }
 
@@ -165,10 +163,18 @@ void c_control_lqr_calcErrorStateVector(pv_msg_input * inputData)
  */
 void c_control_lqr_init()
 {
-
 	// Inicializa as matrizes estaticas
 	arm_mat_init_f32(&equilibrium_control, 4, 1, (float32_t *)equilibrium_control_f32);
 	arm_mat_init_f32(&K, 4, 20, (float32_t *)K_f32);
+	
+	//Initialize result matrices
+	arm_mat_init_f32(&control_output,20, 1, (float32_t *)control_output_f32);
+	arm_mat_init_f32(&delta_control,20,1,(float32_t *)delta_control_f32);
+	
+	//Initializes the matrices
+	arm_mat_init_f32(&equilibrium_point, 20, 1, (float32_t *)equilibrium_point_f32);
+	arm_mat_init_f32(&state_vector, 20, 1, (float32_t *)state_vector_f32);
+	arm_mat_init_f32(&error_state_vector, 20, 1, (float32_t *)error_state_vector_f32);
 }
 
 
@@ -176,28 +182,25 @@ void c_control_lqr_init()
 /** \brief lqr Controller.  */
 void c_control_lqr_controller(pv_msg_input * inputData, pv_type_actuation * output_data)
 {
-	//Initialize result matrices
-	arm_mat_init_f32(&control_output, 4, 1, (float32_t *)control_output_f32);
-	arm_mat_init_f32(&delta_control,4,1,(float32_t *)delta_control_f32);
 	
 	pv_type_stability_error error;
 	float temp_height_takeoff;
-
+	
 	c_control_lqr_calcErrorStateVector(inputData);
 		
 	/* -delta_u = K*delta_x */
-	//arm_mat_mult_f32(&K, &error_state_vector, &delta_control);  // @todo
+	arm_mat_mult_f32(&K, &error_state_vector, &delta_control); //@todo
+	
 	/* u = ur - delta_u */
-	//arm_mat_sub_f32(&equilibrium_control, &delta_control, &control_output); // @todo
+	arm_mat_sub_f32(&equilibrium_control, &delta_control, &control_output); // @todo
 	
 	//The result must be in a struct pv_msg_io_actuation
-	output_data->escRightNewtons= (float)control_output.pData[0];
-	output_data->escLeftNewtons=	 (float)control_output.pData[1];
-	output_data->servoRight=	 (float)control_output.pData[2];
-	output_data->servoLeft=	 (float)control_output.pData[3];
+	output_data->escRightNewtons	=	(float)control_output.pData[0];
+	output_data->escLeftNewtons		=	(float)control_output.pData[1];
+	output_data->servoRight			=	(float)control_output.pData[2];
+	output_data->servoLeft			=	(float)control_output.pData[3];
     //Declares that the servos will use angle control, rather than torque control
 	output_data->servoTorqueControlEnable = 0;
-
 	return;
 }
 
